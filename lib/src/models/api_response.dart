@@ -1,5 +1,3 @@
-import 'package:dio/dio.dart';
-
 class ApiResponse{
   final bool success;
   final int? statusCode;
