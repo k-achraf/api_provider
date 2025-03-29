@@ -315,13 +315,13 @@ class ApiProvider {
     );
   }
 
-  ApiResponse _handleSocketException(String? url) {
-    return ApiResponse(
-      success: false,
-      url: url,
-      message: 'No internet connection',
-    );
-  }
+  // ApiResponse _handleSocketException(String? url) {
+  //   return ApiResponse(
+  //     success: false,
+  //     url: url,
+  //     message: 'No internet connection',
+  //   );
+  // }
 
   ApiResponse _handleTimeOutException(String? url) {
     return ApiResponse(
