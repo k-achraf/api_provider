@@ -1,4 +1,4 @@
-class ApiResponse{
+class ApiResponse {
   final bool success;
   final int? statusCode;
   final dynamic data;

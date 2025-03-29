@@ -1,18 +1,12 @@
 import 'package:dio/dio.dart';
 
-typedef OnRequestCallback = void Function(
-  RequestOptions options,
-);
+typedef OnRequestCallback = void Function(RequestOptions options);
 
-typedef OnErrorCallback = void Function(
-  DioException error,
-);
+typedef OnErrorCallback = void Function(DioException error);
 
-typedef OnResponseCallback = void Function(
-  Response<dynamic> response,
-);
+typedef OnResponseCallback = void Function(Response<dynamic> response);
 
-class ApiProviderConfig{
+class ApiProviderConfig {
   final String baseUrl;
   final dynamic authorization;
   final Duration connectTimeout;
@@ -29,7 +23,8 @@ class ApiProviderConfig{
   final OnResponseCallback? onResponse;
   final Map<String, dynamic>? headers;
 
-  const ApiProviderConfig(this.baseUrl, {
+  const ApiProviderConfig(
+    this.baseUrl, {
     this.connectTimeout = const Duration(seconds: 30),
     this.receiveTimeout = const Duration(seconds: 30),
     this.responseType = ResponseType.json,
@@ -43,6 +38,6 @@ class ApiProviderConfig{
     this.extra,
     this.onRequest,
     this.onError,
-    this.onResponse
+    this.onResponse,
   });
 }

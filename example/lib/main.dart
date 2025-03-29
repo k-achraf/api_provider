@@ -2,31 +2,28 @@ import 'package:easy_api_provider/easy_api_provider.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-
-  ApiProvider.instance.init(ApiProviderConfig(
-    'https://example.com/api',
-    maxRedirects: 1,
-    contentType: 'application/json',
-    receiveTimeout: const Duration(seconds: 30),
-    connectTimeout: const Duration(seconds: 30),
-    headers: {
-      'Accept': 'application/json'
-    },
-    onResponse: (response){
-      print(response);
-    },
-    onError: (error){
-      print(error);
-    },
-    onRequest: (options){
-      print(options);
-    },
-    authorization: 'Bearer <Your bearer token>',
-    extra: {
-      'key': 'value'
-    },
-    requestLogger: true,
-  ));
+  ApiProvider.instance.init(
+    ApiProviderConfig(
+      'https://example.com/api',
+      maxRedirects: 1,
+      contentType: 'application/json',
+      receiveTimeout: const Duration(seconds: 30),
+      connectTimeout: const Duration(seconds: 30),
+      headers: {'Accept': 'application/json'},
+      onResponse: (response) {
+        print(response);
+      },
+      onError: (error) {
+        print(error);
+      },
+      onRequest: (options) {
+        print(options);
+      },
+      authorization: 'Bearer <Your bearer token>',
+      extra: {'key': 'value'},
+      requestLogger: true,
+    ),
+  );
 
   runApp(const MyApp());
 }
@@ -57,7 +54,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,47 +67,37 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             ElevatedButton(
               child: Text('Get data'),
-              onPressed: () async{
-
+              onPressed: () async {
                 final ApiResponse response = await ApiProvider.instance.get(
                   '/example',
-                  params: {
-                    'param': 'value'
-                  },
+                  params: {'param': 'value'},
                 );
 
-                if(response.success){
+                if (response.success) {
                   print('Success response');
                   print(response.data);
-                }
-                else{
+                } else {
                   print('Error response');
                   print(response.data);
                 }
-
               },
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(height: 10),
             ElevatedButton(
               child: Text('Send data'),
-              onPressed: () async{
-
+              onPressed: () async {
                 final ApiResponse response = await ApiProvider.instance.post(
                   '/example',
-                  data: {
-                    'key': 'value'
-                  },
+                  data: {'key': 'value'},
                 );
 
-                if(response.success){
+                if (response.success) {
                   print('Success response');
                   print(response.data);
-                }
-                else{
+                } else {
                   print('Error response');
                   print(response.data);
                 }
-
               },
             ),
           ],

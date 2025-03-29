@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
@@ -7,8 +6,7 @@ import 'package:ansicolor/ansicolor.dart';
 
 import '../../easy_api_provider.dart';
 
-class ApiProvider{
-
+class ApiProvider {
   ApiProvider._();
 
   static final instance = ApiProvider._();
@@ -22,45 +20,52 @@ class ApiProvider{
     return _dio!;
   }
 
-  void init(ApiProviderConfig config){
-
-    _dio = Dio(BaseOptions(
-      baseUrl: config.baseUrl,
-      responseType: config.responseType,
-      connectTimeout: config.connectTimeout,
-      receiveTimeout: config.receiveTimeout,
-      contentType: config.contentType,
-      maxRedirects: config.maxRedirects,
-      headers: config.headers
-    ))
+  void init(ApiProviderConfig config) {
+    _dio = Dio(
+        BaseOptions(
+          baseUrl: config.baseUrl,
+          responseType: config.responseType,
+          connectTimeout: config.connectTimeout,
+          receiveTimeout: config.receiveTimeout,
+          contentType: config.contentType,
+          maxRedirects: config.maxRedirects,
+          headers: config.headers,
+        ),
+      )
       ..interceptors.add(
         InterceptorsWrapper(
-          onRequest: (RequestOptions options, RequestInterceptorHandler handler){
+          onRequest: (
+            RequestOptions options,
+            RequestInterceptorHandler handler,
+          ) {
             config.onRequest?.call(options);
 
             return handler.next(options);
           },
-          onError: (DioException error, ErrorInterceptorHandler handler){
+          onError: (DioException error, ErrorInterceptorHandler handler) {
             config.onError?.call(error);
             return handler.next(error);
           },
-          onResponse: (Response<dynamic> response, ResponseInterceptorHandler handler){
+          onResponse: (
+            Response<dynamic> response,
+            ResponseInterceptorHandler handler,
+          ) {
             config.onResponse?.call(response);
             return handler.next(response);
-          }
-        )
+          },
+        ),
       );
 
-    if(config.authorization != null){
+    if (config.authorization != null) {
       dio.options.headers['Authorization'] = config.authorization;
     }
-    if(config.listFormat != null){
+    if (config.listFormat != null) {
       dio.options.listFormat = config.listFormat!;
     }
-    if(config.extra != null){
+    if (config.extra != null) {
       dio.options.extra = config.extra!;
     }
-    if(config.requestLogger){
+    if (config.requestLogger) {
       dio.interceptors.add(
         TalkerDioLogger(
           settings: TalkerDioLoggerSettings(
@@ -73,21 +78,20 @@ class ApiProvider{
             printResponseData: true,
             printResponseMessage: true,
             responsePen: AnsiPen()..blue(),
-            errorPen: AnsiPen()..red()
+            errorPen: AnsiPen()..red(),
           ),
-        )
+        ),
       );
     }
-    if(config.headers != null){
+    if (config.headers != null) {
       dio.options.headers = config.headers;
     }
   }
 
-  void setAuthorisation(dynamic authorization){
-    if(authorization == null){
+  void setAuthorisation(dynamic authorization) {
+    if (authorization == null) {
       dio.options.headers.remove('Authorization');
-    }
-    else{
+    } else {
       dio.options.headers['Authorization'] = authorization;
     }
   }
@@ -101,15 +105,14 @@ class ApiProvider{
    */
 
   // Get method
-  Future<ApiResponse> get(String path, {
+  Future<ApiResponse> get(
+    String path, {
     Map<String, dynamic>? params,
     Options? requestOptions,
     CancelToken? cancelToken,
-    ProgressCallback? progressCallback
-  })
-  async {
-
-    try{
+    ProgressCallback? progressCallback,
+  }) async {
+    try {
       final Response response = await dio.get(
         path,
         queryParameters: params,
@@ -119,34 +122,26 @@ class ApiProvider{
       );
 
       return _handleResponse(response, '${dio.options.baseUrl}/$path');
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return _handleDioError(e, '${dio.options.baseUrl}/$path');
-    }
-    on SocketException {
-      return _handleSocketException('${dio.options.baseUrl}/$path');
-    }
-    on TimeoutException {
+    } on TimeoutException {
       return _handleTimeOutException('${dio.options.baseUrl}/$path');
-    }
-    catch(e){
+    } catch (e) {
       return _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
     }
-
   }
 
   // Post method
-  Future<ApiResponse> post(String path, {
+  Future<ApiResponse> post(
+    String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
-    ProgressCallback? onSendProgress
-  })
-  async {
-
-    try{
+    ProgressCallback? onSendProgress,
+  }) async {
+    try {
       final Response response = await dio.post(
         path,
         data: data,
@@ -158,34 +153,26 @@ class ApiProvider{
       );
 
       return _handleResponse(response, '${dio.options.baseUrl}/$path');
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return _handleDioError(e, '${dio.options.baseUrl}/$path');
-    }
-    on SocketException {
-      return _handleSocketException('${dio.options.baseUrl}/$path');
-    }
-    on TimeoutException {
+    } on TimeoutException {
       return _handleTimeOutException('${dio.options.baseUrl}/$path');
-    }
-    catch(e){
+    } catch (e) {
       return _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
     }
-
   }
 
   // Patch method
-  Future<ApiResponse> patch(String path, {
+  Future<ApiResponse> patch(
+    String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
-    ProgressCallback? onSendProgress
-  })
-  async {
-
-    try{
+    ProgressCallback? onSendProgress,
+  }) async {
+    try {
       final Response response = await dio.patch(
         path,
         data: data,
@@ -197,34 +184,26 @@ class ApiProvider{
       );
 
       return _handleResponse(response, '${dio.options.baseUrl}/$path');
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return _handleDioError(e, '${dio.options.baseUrl}/$path');
-    }
-    on SocketException {
-      return _handleSocketException('${dio.options.baseUrl}/$path');
-    }
-    on TimeoutException {
+    } on TimeoutException {
       return _handleTimeOutException('${dio.options.baseUrl}/$path');
-    }
-    catch(e){
+    } catch (e) {
       return _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
     }
-
   }
 
   // Put method
-  Future<ApiResponse> put(String path, {
+  Future<ApiResponse> put(
+    String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
-    ProgressCallback? onSendProgress
-  })
-  async {
-
-    try{
+    ProgressCallback? onSendProgress,
+  }) async {
+    try {
       final Response response = await dio.put(
         path,
         data: data,
@@ -236,32 +215,24 @@ class ApiProvider{
       );
 
       return _handleResponse(response, '${dio.options.baseUrl}/$path');
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return _handleDioError(e, '${dio.options.baseUrl}/$path');
-    }
-    on SocketException {
-      return _handleSocketException('${dio.options.baseUrl}/$path');
-    }
-    on TimeoutException {
+    } on TimeoutException {
       return _handleTimeOutException('${dio.options.baseUrl}/$path');
-    }
-    catch(e){
+    } catch (e) {
       return _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
     }
-
   }
 
   // Delete method
-  Future<ApiResponse> delete(String path, {
+  Future<ApiResponse> delete(
+    String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
-  })
-  async {
-
-    try{
+  }) async {
+    try {
       final Response response = await dio.delete(
         path,
         data: data,
@@ -271,34 +242,28 @@ class ApiProvider{
       );
 
       return _handleResponse(response, '${dio.options.baseUrl}/$path');
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return _handleDioError(e, '${dio.options.baseUrl}/$path');
-    }
-    on SocketException {
-      return _handleSocketException('${dio.options.baseUrl}/$path');
-    }
-    on TimeoutException {
+    } on TimeoutException {
       return _handleTimeOutException('${dio.options.baseUrl}/$path');
-    }
-    catch(e){
+    } catch (e) {
       return _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
     }
-
   }
 
   // Download method
-  Future<ApiResponse> download(String urlPath, String savePath, {
+  Future<ApiResponse> download(
+    String urlPath,
+    String savePath, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
-    bool deleteOnError = true
-  })
-  async {
-    try{
+    bool deleteOnError = true,
+  }) async {
+    try {
       final Response response = await dio.download(
         urlPath,
         savePath,
@@ -312,35 +277,26 @@ class ApiProvider{
       );
 
       return _handleResponse(response, '${dio.options.baseUrl}/$urlPath');
-    }
-    on DioException catch(e){
+    } on DioException catch (e) {
       return _handleDioError(e, '${dio.options.baseUrl}/$urlPath');
-    }
-    on SocketException {
-      return _handleSocketException('${dio.options.baseUrl}/$urlPath');
-    }
-    on TimeoutException {
+    } on TimeoutException {
       return _handleTimeOutException('${dio.options.baseUrl}/$urlPath');
-    }
-    catch(e){
+    } catch (e) {
       return _handleUnexpectedException(e, '${dio.options.baseUrl}/$urlPath');
     }
   }
 
-  ApiResponse _handleResponse(Response response, String? url){
-
+  ApiResponse _handleResponse(Response response, String? url) {
     return ApiResponse(
       success: true,
       statusCode: response.statusCode,
       data: response.data,
       url: url,
-      message: response.data?['message'] ?? 'Success'
+      message: response.data?['message'] ?? 'Success',
     );
-
   }
 
-  ApiResponse _handleDioError(DioException error, String? url){
-
+  ApiResponse _handleDioError(DioException error, String? url) {
     String errorMessage = 'Unexpected error occurred';
     if (error.type == DioExceptionType.connectionTimeout) {
       errorMessage = 'Connection timeout';
@@ -355,33 +311,32 @@ class ApiProvider{
       statusCode: error.response?.statusCode,
       data: error.response?.data,
       url: url,
-      message: errorMessage
+      message: errorMessage,
     );
-
   }
 
-  ApiResponse _handleSocketException(String? url){
+  ApiResponse _handleSocketException(String? url) {
     return ApiResponse(
       success: false,
       url: url,
-      message: 'No internet connection'
+      message: 'No internet connection',
     );
   }
 
-  ApiResponse _handleTimeOutException(String? url){
+  ApiResponse _handleTimeOutException(String? url) {
     return ApiResponse(
       success: false,
       message: 'Server not responding',
-      url: url
+      url: url,
     );
   }
 
-  ApiResponse _handleUnexpectedException(Object? error, String? url){
+  ApiResponse _handleUnexpectedException(Object? error, String? url) {
     return ApiResponse(
       success: false,
       url: url,
       data: error,
-      message: error.toString()
+      message: error.toString(),
     );
   }
 }
