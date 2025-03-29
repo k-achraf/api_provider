@@ -9,3 +9,7 @@
 
 ### Fixed
 - Resolved initial issues and enhanced package stability.
+
+## [1.0.1] - 2025-03-29
+### Fixed
+- Fix wasm support issue.
