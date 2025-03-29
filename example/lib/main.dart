@@ -1,4 +1,4 @@
-import 'package:api_provider/api_provider.dart';
+import 'package:easy_api_provider/easy_api_provider.dart';
 import 'package:flutter/material.dart';
 
 void main() {

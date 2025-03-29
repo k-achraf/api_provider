@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 import 'package:ansicolor/ansicolor.dart';
 
-import '../../api_provider.dart';
+import '../../easy_api_provider.dart';
 
 class ApiProvider{
 

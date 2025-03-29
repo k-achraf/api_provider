@@ -1,4 +1,4 @@
-library api_provider;
+library easy_api_provider;
 
 export 'src/models/api_response.dart';
 export 'src/models/api_provider_config.dart';

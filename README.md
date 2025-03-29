@@ -30,7 +30,7 @@ flutter pub get
 ### Import the package
 
 ```dart
-import 'package:api_provider/api_provider.dart';
+import 'package:api_provider/easy_api_provider.dart';
 ```
 
 ### Initialize the provider
