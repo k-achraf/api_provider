@@ -55,7 +55,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   ApiProviderController controller = ApiProviderController();
 
   @override
@@ -69,16 +68,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ApiProviderUi(
-              controller: controller,
-            ),
+            ApiProviderUi(controller: controller),
             ElevatedButton(
               child: Text('Get data'),
               onPressed: () async {
                 final ApiResponse response = await ApiProvider.instance.get(
                   '/avatar/info',
                   params: {'param': 'value'},
-                  controller: controller
+                  controller: controller,
                 );
 
                 if (response.success) {
@@ -97,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 final ApiResponse response = await ApiProvider.instance.post(
                   '/example',
                   data: {'key': 'value'},
-                  controller: controller
+                  controller: controller,
                 );
 
                 if (response.success) {

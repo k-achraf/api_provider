@@ -8,12 +8,8 @@ class SuccessWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(
-          Icons.check_circle,
-          color: const Color(0xFF3FAE2A),
-          size: 50,
-        ),
-        const SizedBox(height: 20,),
+        Icon(Icons.check_circle, color: const Color(0xFF3FAE2A), size: 50),
+        const SizedBox(height: 20),
         Text('Success'),
       ],
     );

@@ -111,9 +111,9 @@ class ApiProvider {
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? progressCallback,
-    ApiProviderController? controller
+    ApiProviderController? controller,
   }) async {
-    if(controller != null){
+    if (controller != null) {
       controller.loading();
     }
     try {
@@ -126,28 +126,33 @@ class ApiProvider {
       );
 
       ApiResponse r = _handleResponse(response, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.success(apiResponse: r);
       }
 
       return r;
     } on DioException catch (e) {
       ApiResponse error = _handleDioError(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } on TimeoutException {
-      ApiResponse error = _handleTimeOutException('${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleTimeOutException(
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } catch (e) {
-      ApiResponse error = _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleUnexpectedException(
+        e,
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
@@ -164,9 +169,9 @@ class ApiProvider {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
-    ApiProviderController? controller
+    ApiProviderController? controller,
   }) async {
-    if(controller != null){
+    if (controller != null) {
       controller.loading();
     }
     try {
@@ -181,28 +186,33 @@ class ApiProvider {
       );
 
       ApiResponse r = _handleResponse(response, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.success(apiResponse: r);
       }
 
       return r;
     } on DioException catch (e) {
       ApiResponse error = _handleDioError(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } on TimeoutException {
-      ApiResponse error = _handleTimeOutException('${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleTimeOutException(
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } catch (e) {
-      ApiResponse error = _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleUnexpectedException(
+        e,
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
@@ -219,9 +229,9 @@ class ApiProvider {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
-    ApiProviderController? controller
+    ApiProviderController? controller,
   }) async {
-    if(controller != null){
+    if (controller != null) {
       controller.loading();
     }
     try {
@@ -236,28 +246,33 @@ class ApiProvider {
       );
 
       ApiResponse r = _handleResponse(response, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.success(apiResponse: r);
       }
 
       return r;
     } on DioException catch (e) {
       ApiResponse error = _handleDioError(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } on TimeoutException {
-      ApiResponse error = _handleTimeOutException('${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleTimeOutException(
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } catch (e) {
-      ApiResponse error = _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleUnexpectedException(
+        e,
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
@@ -274,9 +289,9 @@ class ApiProvider {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
-    ApiProviderController? controller
+    ApiProviderController? controller,
   }) async {
-    if(controller != null){
+    if (controller != null) {
       controller.loading();
     }
     try {
@@ -291,28 +306,33 @@ class ApiProvider {
       );
 
       ApiResponse r = _handleResponse(response, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.success(apiResponse: r);
       }
 
       return r;
     } on DioException catch (e) {
       ApiResponse error = _handleDioError(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } on TimeoutException {
-      ApiResponse error = _handleTimeOutException('${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleTimeOutException(
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } catch (e) {
-      ApiResponse error = _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleUnexpectedException(
+        e,
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
@@ -327,9 +347,9 @@ class ApiProvider {
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
-    ApiProviderController? controller
+    ApiProviderController? controller,
   }) async {
-    if(controller != null){
+    if (controller != null) {
       controller.loading();
     }
     try {
@@ -342,28 +362,33 @@ class ApiProvider {
       );
 
       ApiResponse r = _handleResponse(response, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.success(apiResponse: r);
       }
 
       return r;
     } on DioException catch (e) {
       ApiResponse error = _handleDioError(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } on TimeoutException {
-      ApiResponse error = _handleTimeOutException('${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleTimeOutException(
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } catch (e) {
-      ApiResponse error = _handleUnexpectedException(e, '${dio.options.baseUrl}/$path');
-      if(controller != null){
+      ApiResponse error = _handleUnexpectedException(
+        e,
+        '${dio.options.baseUrl}/$path',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
@@ -382,9 +407,9 @@ class ApiProvider {
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
     bool deleteOnError = true,
-    ApiProviderController? controller
+    ApiProviderController? controller,
   }) async {
-    if(controller != null){
+    if (controller != null) {
       controller.loading();
     }
     try {
@@ -400,29 +425,37 @@ class ApiProvider {
         queryParameters: params,
       );
 
-      ApiResponse r = _handleResponse(response, '${dio.options.baseUrl}/$urlPath');
-      if(controller != null){
+      ApiResponse r = _handleResponse(
+        response,
+        '${dio.options.baseUrl}/$urlPath',
+      );
+      if (controller != null) {
         controller.success(apiResponse: r);
       }
 
       return r;
     } on DioException catch (e) {
       ApiResponse error = _handleDioError(e, '${dio.options.baseUrl}/$urlPath');
-      if(controller != null){
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } on TimeoutException {
-      ApiResponse error = _handleTimeOutException('${dio.options.baseUrl}/$urlPath');
-      if(controller != null){
+      ApiResponse error = _handleTimeOutException(
+        '${dio.options.baseUrl}/$urlPath',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 
       return error;
     } catch (e) {
-      ApiResponse error = _handleUnexpectedException(e, '${dio.options.baseUrl}/$urlPath');
-      if(controller != null){
+      ApiResponse error = _handleUnexpectedException(
+        e,
+        '${dio.options.baseUrl}/$urlPath',
+      );
+      if (controller != null) {
         controller.error(apiResponse: error);
       }
 

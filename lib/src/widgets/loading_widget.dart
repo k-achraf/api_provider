@@ -11,7 +11,7 @@ class LoadingWidget extends StatelessWidget {
           backgroundColor: Theme.of(context).canvasColor,
           color: Theme.of(context).primaryColor,
         ),
-        SizedBox(height: 20,),
+        SizedBox(height: 20),
         Text('Data loading ...'),
       ],
     );

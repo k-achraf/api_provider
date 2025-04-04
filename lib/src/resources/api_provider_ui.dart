@@ -7,7 +7,8 @@ import 'package:easy_api_provider/src/widgets/error_widget.dart';
 import 'package:flutter/material.dart';
 
 typedef WidgetParam = Widget Function(BuildContext context);
-typedef ResponseWidget = Widget Function(BuildContext context, ApiResponse? response);
+typedef ResponseWidget =
+    Widget Function(BuildContext context, ApiResponse? response);
 
 class ApiProviderUi extends StatefulWidget {
   final ApiProviderController controller;
@@ -23,7 +24,7 @@ class ApiProviderUi extends StatefulWidget {
     this.successWidget,
     this.errorWidget,
     this.emptyWidget,
-    super.key
+    super.key,
   });
 
   @override
@@ -31,14 +32,11 @@ class ApiProviderUi extends StatefulWidget {
 }
 
 class _ApiProviderUiState extends State<ApiProviderUi> {
-
   @override
   void initState() {
-    if(mounted){
-      widget.controller.listen((status){
-        setState(() {
-
-        });
+    if (mounted) {
+      widget.controller.listen((status) {
+        setState(() {});
       });
     }
     super.initState();
@@ -46,13 +44,18 @@ class _ApiProviderUiState extends State<ApiProviderUi> {
 
   @override
   Widget build(BuildContext context) {
-    switch(widget.controller.status){
+    switch (widget.controller.status) {
       case ApiProviderStatus.loading:
         return widget.loadingWidget?.call(context) ?? LoadingWidget();
       case ApiProviderStatus.success:
-        return widget.successWidget?.call(context, widget.controller.response) ?? SuccessWidget();
+        return widget.successWidget?.call(
+              context,
+              widget.controller.response,
+            ) ??
+            SuccessWidget();
       case ApiProviderStatus.error:
-        return widget.errorWidget?.call(context, widget.controller.response) ?? ApiErrorWidget();
+        return widget.errorWidget?.call(context, widget.controller.response) ??
+            ApiErrorWidget();
       case ApiProviderStatus.empty:
         return widget.emptyWidget?.call(context) ?? EmptyWidget();
       default:
