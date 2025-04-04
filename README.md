@@ -3,9 +3,11 @@
 [![pub package](https://img.shields.io/pub/v/easy_api_provider.svg)](https://pub.dev/packages/easy_api_provider)
 [![pub points](https://img.shields.io/pub/points/easy_api_provider?color=2E8B57&label=pub%20points)](https://pub.dev/packages/easy_api_provider/score)
 
+<div>
 <a href="https://thebsd.github.io/StandWithPalestine/" target="_blank">
   <img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/StandWithPalestine.svg"/>
 </a>
+</div>
 A Flutter package for making API requests easily with built-in caching, request retries, and error handling.
 
 ## Features
