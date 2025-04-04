@@ -26,7 +26,7 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  api_provider: 1.0.0
+  api_provider: latest
 ```
 
 Then, run:
