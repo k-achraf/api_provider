@@ -13,3 +13,8 @@
 ## [1.0.1] - 2025-03-29
 ### Fixed
 - Fix wasm support issue.
+
+## [1.1.0] - 2025-04-04
+### Added
+- add ApiProviderUi to handle api states: idle, loading, empty, success, error
+- Automatically handle api states
