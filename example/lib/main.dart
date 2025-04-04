@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 void main() {
   ApiProvider.instance.init(
     ApiProviderConfig(
-      'https://example.com/api',
+      'https://api.sampleapis.com',
       maxRedirects: 1,
       contentType: 'application/json',
       receiveTimeout: const Duration(seconds: 30),
@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -54,6 +55,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  ApiProviderController controller = ApiProviderController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,12 +69,16 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            ApiProviderUi(
+              controller: controller,
+            ),
             ElevatedButton(
               child: Text('Get data'),
               onPressed: () async {
                 final ApiResponse response = await ApiProvider.instance.get(
-                  '/example',
+                  '/avatar/info',
                   params: {'param': 'value'},
+                  controller: controller
                 );
 
                 if (response.success) {
@@ -89,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 final ApiResponse response = await ApiProvider.instance.post(
                   '/example',
                   data: {'key': 'value'},
+                  controller: controller
                 );
 
                 if (response.success) {

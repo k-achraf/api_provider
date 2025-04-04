@@ -2,6 +2,14 @@
 
 A Flutter package for making API requests easily with built-in caching, request retries, and error handling.
 
+<div align="center">
+
+  <a href="https://thebsd.github.io/StandWithPalestine/" target="_blank">
+    <img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/StandWithPalestine.svg" alt="free palestine"/>
+  </a>
+
+</div>
+
 ## Features
 
 - Simple and easy-to-use API request handling
@@ -122,8 +130,60 @@ The `ApiResponse` class is used to encapsulate the results of network requests e
 - `url` _(String?)_: The request URL.
 - `message` _(String?)_: A descriptive message for debugging or logging purposes.
 
-## Contributing
+## **Using The UI Handler**
+## Description
+The `ApiProviderUi` is a widget that dynamically different UI states based on the API request status managed by `ApiProviderController`. it provides a structured way to handle various api states including:
+- `idle`: The initial state before an API request is made
+- `loading`: Displays a loading indicator or custom widget while the request is in progress
+- `success`: shows the successful widget with response data
+- `error`: displays the error widget with error data
+- `empty`: shown when success response with empty data
+- 
+## How To Use
+```dart
+ApiProviderController controller = ApiProviderController();
 
+ApiProviderUi(
+  controller: controller,
+  idleWidget: (context) => IdleWidget(),
+  loadingWidget: (context) => LoadingWidget(),
+  emptyWidget: (context) => EmptyWidget(),
+  successWidget: (context, ApiResponse? response) => SuccessWidget(response),
+  errorWidget: (context, ApiResponse? response) => ErrorWidget(response),
+),
+```
+
+Then you can handle Ui states using controller:
+```dart
+controller.idle();
+controller.loading();
+controller.empty();
+controller.success();
+controller.error();
+```
+
+You can listen for status:
+```dart
+controller.listen((ApiProviderStatus status){
+  print(status) //ApiProviderStatus.idle, ApiProviderStatus.loading, ApiProviderStatus.success, ApiProviderStatus.error, ApiProviderStatus.empty
+});
+```
+
+## Handle api request, response automatically
+You can automatically handle api request, response status by pass the controller to your request like this:
+```dart
+final ApiResponse response = await ApiProvider.instance.get(
+  '/avatar/info',
+  params: {'param': 'value'},
+  controller: controller
+);
+```
+So here the `ApiProvider` will handle the states for you
+- Set the loading state before send the request
+- Set the success state when receive success response and pass the `ApiResponse`
+- Set the error state when receive error response and pass the `ApiResponse`
+- 
+## Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License
