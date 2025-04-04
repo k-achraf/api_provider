@@ -8,6 +8,8 @@
   <img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/StandWithPalestine.svg"/>
 </a>
 </div>
+
+<br /><br/>
 A Flutter package for making API requests easily with built-in caching, request retries, and error handling.
 
 ## Features
