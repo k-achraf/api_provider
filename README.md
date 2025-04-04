@@ -1,14 +1,12 @@
 # api_provider
 
+[![pub package](https://img.shields.io/pub/v/easy_api_provider.svg)](https://pub.dev/packages/easy_api_provider)
+[![pub points](https://img.shields.io/pub/points/easy_api_provider?color=2E8B57&label=pub%20points)](https://pub.dev/packages/easy_api_provider/score)
+
+<a href="https://thebsd.github.io/StandWithPalestine/" target="_blank">
+  <img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/StandWithPalestine.svg"/>
+</a>
 A Flutter package for making API requests easily with built-in caching, request retries, and error handling.
-
-<div align="center">
-
-  <a href="https://thebsd.github.io/StandWithPalestine/" target="_blank">
-    <img src="https://raw.githubusercontent.com/Safouene1/support-palestine-banner/master/StandWithPalestine.svg" alt="free palestine"/>
-  </a>
-
-</div>
 
 ## Features
 
@@ -182,7 +180,7 @@ So here the `ApiProvider` will handle the states for you
 - Set the loading state before send the request
 - Set the success state when receive success response and pass the `ApiResponse`
 - Set the error state when receive error response and pass the `ApiResponse`
-- 
+
 ## Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
