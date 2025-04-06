@@ -6,13 +6,23 @@ import 'package:ansicolor/ansicolor.dart';
 
 import '../../easy_api_provider.dart';
 
+/// A singleton class that provides a configured Dio instance for making HTTP requests.
+///
+/// This class supports custom configuration, request/response/error interceptors,
+/// and optional logging using [TalkerDioLogger].
 class ApiProvider {
+  /// Private constructor for the singleton pattern.
   ApiProvider._();
 
+  /// Singleton instance of [ApiProvider].
   static final instance = ApiProvider._();
 
+  /// Internal Dio client instance.
   Dio? _dio;
 
+  /// Returns the initialized Dio instance.
+  ///
+  /// Throws an [Exception] if [init] has not been called yet.
   Dio get dio {
     if (_dio == null) {
       throw Exception('You need to call "init" function first');
@@ -20,51 +30,51 @@ class ApiProvider {
     return _dio!;
   }
 
+  /// Initializes the Dio client with the given [config].
+  ///
+  /// This method configures base options, adds interceptors for request, response,
+  /// and error handling, sets authorization headers, and enables request logging
+  /// if configured.
   void init(ApiProviderConfig config) {
     _dio = Dio(
-        BaseOptions(
-          baseUrl: config.baseUrl,
-          responseType: config.responseType,
-          connectTimeout: config.connectTimeout,
-          receiveTimeout: config.receiveTimeout,
-          contentType: config.contentType,
-          maxRedirects: config.maxRedirects,
-          headers: config.headers,
-        ),
-      )
-      ..interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (
-            RequestOptions options,
-            RequestInterceptorHandler handler,
-          ) {
-            config.onRequest?.call(options);
-
-            return handler.next(options);
-          },
-          onError: (DioException error, ErrorInterceptorHandler handler) {
-            config.onError?.call(error);
-            return handler.next(error);
-          },
-          onResponse: (
-            Response<dynamic> response,
-            ResponseInterceptorHandler handler,
-          ) {
-            config.onResponse?.call(response);
-            return handler.next(response);
-          },
-        ),
-      );
+      BaseOptions(
+        baseUrl: config.baseUrl,
+        responseType: config.responseType,
+        connectTimeout: config.connectTimeout,
+        receiveTimeout: config.receiveTimeout,
+        contentType: config.contentType,
+        maxRedirects: config.maxRedirects,
+        headers: config.headers,
+      ),
+    )..interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+          config.onRequest?.call(options);
+          return handler.next(options);
+        },
+        onError: (DioException error, ErrorInterceptorHandler handler) {
+          config.onError?.call(error);
+          return handler.next(error);
+        },
+        onResponse: (Response<dynamic> response, ResponseInterceptorHandler handler) {
+          config.onResponse?.call(response);
+          return handler.next(response);
+        },
+      ),
+    );
 
     if (config.authorization != null) {
       dio.options.headers['Authorization'] = config.authorization;
     }
+
     if (config.listFormat != null) {
       dio.options.listFormat = config.listFormat!;
     }
+
     if (config.extra != null) {
       dio.options.extra = config.extra!;
     }
+
     if (config.requestLogger) {
       dio.interceptors.add(
         TalkerDioLogger(
@@ -83,11 +93,16 @@ class ApiProvider {
         ),
       );
     }
+
     if (config.headers != null) {
       dio.options.headers = config.headers;
     }
   }
 
+  /// Sets or removes the authorization header.
+  ///
+  /// If [authorization] is `null`, the `Authorization` header will be removed.
+  /// Otherwise, it will be set to the provided value.
   void setAuthorisation(dynamic authorization) {
     if (authorization == null) {
       dio.options.headers.remove('Authorization');
@@ -96,15 +111,22 @@ class ApiProvider {
     }
   }
 
+  /// Updates the base URL used by the Dio client.
   void setBaseUrl(String baseUrl) {
     dio.options.baseUrl = baseUrl;
   }
 
-  /*
-    Handle request types
-   */
-
-  // Get method
+  /// Sends a GET request to the specified [path] using Dio.
+  ///
+  /// You can optionally pass:
+  /// - [params]: A map of query parameters.
+  /// - [requestOptions]: Custom request options.
+  /// - [cancelToken]: A token to cancel the request.
+  /// - [progressCallback]: A callback to track progress while receiving data.
+  /// - [controller]: An [ApiProviderController] to manage UI state like loading, success, or error.
+  ///
+  /// Returns an [ApiResponse] which contains the result of the request.
+  /// If an error occurs, the [ApiResponse] will include the appropriate error data.
   Future<ApiResponse> get(
     String path, {
     Map<String, dynamic>? params,
@@ -160,7 +182,19 @@ class ApiProvider {
     }
   }
 
-  // Post method
+  /// Sends a POST request to the specified [path] using Dio.
+  ///
+  /// Optional parameters:
+  /// - [params]: A map of query parameters to be appended to the URL.
+  /// - [data]: A map of data to be sent in the request body.
+  /// - [requestOptions]: Custom [Options] such as headers or content type.
+  /// - [cancelToken]: A [CancelToken] to cancel the request if needed.
+  /// - [onReceiveProgress]: A callback to track download progress.
+  /// - [onSendProgress]: A callback to track upload progress.
+  /// - [controller]: An [ApiProviderController] to handle loading, success, or error states.
+  ///
+  /// Returns an [ApiResponse] that contains either the result of the request or error details.
+
   Future<ApiResponse> post(
     String path, {
     Map<String, dynamic>? params,
@@ -220,7 +254,19 @@ class ApiProvider {
     }
   }
 
-  // Patch method
+  /// Sends a PATCH request to the specified [path] using Dio.
+  ///
+  /// Optional parameters:
+  /// - [params]: A map of query parameters to be appended to the URL.
+  /// - [data]: A map of data to be sent in the request body.
+  /// - [requestOptions]: Custom [Options] such as headers or content type.
+  /// - [cancelToken]: A [CancelToken] to cancel the request if needed.
+  /// - [onReceiveProgress]: A callback to track download progress.
+  /// - [onSendProgress]: A callback to track upload progress.
+  /// - [controller]: An [ApiProviderController] to handle loading, success, or error states.
+  ///
+  /// Returns an [ApiResponse] that contains either the result of the request or error details.
+
   Future<ApiResponse> patch(
     String path, {
     Map<String, dynamic>? params,
@@ -280,7 +326,19 @@ class ApiProvider {
     }
   }
 
-  // Put method
+  /// Sends a PUT request to the specified [path] using Dio.
+  ///
+  /// Optional parameters:
+  /// - [params]: A map of query parameters to be appended to the URL.
+  /// - [data]: A map of data to be sent in the request body.
+  /// - [requestOptions]: Custom [Options] such as headers or content type.
+  /// - [cancelToken]: A [CancelToken] to cancel the request if needed.
+  /// - [onReceiveProgress]: A callback to track download progress.
+  /// - [onSendProgress]: A callback to track upload progress.
+  /// - [controller]: An [ApiProviderController] to handle loading, success, or error states.
+  ///
+  /// Returns an [ApiResponse] that contains either the result of the request or error details.
+
   Future<ApiResponse> put(
     String path, {
     Map<String, dynamic>? params,
@@ -340,7 +398,19 @@ class ApiProvider {
     }
   }
 
-  // Delete method
+  /// Sends a DELETE request to the specified [path] using Dio.
+  ///
+  /// Optional parameters:
+  /// - [params]: A map of query parameters to be appended to the URL.
+  /// - [data]: A map of data to be sent in the request body.
+  /// - [requestOptions]: Custom [Options] such as headers or content type.
+  /// - [cancelToken]: A [CancelToken] to cancel the request if needed.
+  /// - [onReceiveProgress]: A callback to track download progress.
+  /// - [onSendProgress]: A callback to track upload progress.
+  /// - [controller]: An [ApiProviderController] to handle loading, success, or error states.
+  ///
+  /// Returns an [ApiResponse] that contains either the result of the request or error details.
+
   Future<ApiResponse> delete(
     String path, {
     Map<String, dynamic>? params,
@@ -396,7 +466,19 @@ class ApiProvider {
     }
   }
 
-  // Download method
+  /// Downloads a file from the given [urlPath] and saves it to [savePath].
+  ///
+  /// Optional parameters:
+  /// - [params]: A map of query parameters to be appended to the URL.
+  /// - [data]: A map of data to be sent with the request.
+  /// - [requestOptions]: Custom Dio [Options] such as headers.
+  /// - [cancelToken]: A [CancelToken] to cancel the request if needed.
+  /// - [onReceiveProgress]: A callback to track download progress.
+  /// - [onSendProgress]: A callback to track upload progress (if any).
+  /// - [deleteOnError]: If true (default), deletes the file if an error occurs during download.
+  /// - [controller]: An [ApiProviderController] to handle loading, success, or error states.
+  ///
+  /// Returns an [ApiResponse] with either the result of the download or error details.
   Future<ApiResponse> download(
     String urlPath,
     String savePath, {
@@ -463,6 +545,21 @@ class ApiProvider {
     }
   }
 
+  /// Handles the response from the API request and returns an [ApiResponse].
+  ///
+  /// This function takes the [Response] from Dio and processes the status code,
+  /// data, and message from the response. It returns an [ApiResponse] indicating
+  /// whether the request was successful or not.
+  ///
+  /// - [response]: The [Response] object returned by the Dio request.
+  /// - [url]: The URL of the request to be included in the [ApiResponse] for logging or debugging.
+  ///
+  /// Returns an [ApiResponse] object with the following fields:
+  /// - `success`: A boolean indicating the success of the request.
+  /// - `statusCode`: The HTTP status code from the response.
+  /// - `data`: The data returned from the API.
+  /// - `url`: The URL of the request.
+  /// - `message`: The message from the response data or a default 'Success' message.
   ApiResponse _handleResponse(Response response, String? url) {
     return ApiResponse(
       success: true,
@@ -473,6 +570,20 @@ class ApiProvider {
     );
   }
 
+
+  /// Handles errors from Dio requests and returns an [ApiResponse].
+  ///
+  /// This function processes the error type and generates an appropriate error message.
+  ///
+  /// - [error]: The [DioException] object that was thrown during the request.
+  /// - [url]: The URL of the request, which can be used for logging or debugging.
+  ///
+  /// Returns an [ApiResponse] object with the following fields:
+  /// - `success`: A boolean indicating the success of the request (always `false` for errors).
+  /// - `statusCode`: The HTTP status code from the error response.
+  /// - `data`: The data from the error response.
+  /// - `url`: The URL of the request.
+  /// - `message`: A string describing the error.
   ApiResponse _handleDioError(DioException error, String? url) {
     String errorMessage = 'Unexpected error occurred';
     if (error.type == DioExceptionType.connectionTimeout) {
@@ -492,14 +603,16 @@ class ApiProvider {
     );
   }
 
-  // ApiResponse _handleSocketException(String? url) {
-  //   return ApiResponse(
-  //     success: false,
-  //     url: url,
-  //     message: 'No internet connection',
-  //   );
-  // }
-
+  /// Handles timeout exceptions and returns an [ApiResponse].
+  ///
+  /// This function generates a custom message when the server does not respond.
+  ///
+  /// - [url]: The URL of the request to include in the response.
+  ///
+  /// Returns an [ApiResponse] object with the following fields:
+  /// - `success`: A boolean indicating the success of the request (always `false` for errors).
+  /// - `message`: A custom message indicating that the server is not responding.
+  /// - `url`: The URL of the request.
   ApiResponse _handleTimeOutException(String? url) {
     return ApiResponse(
       success: false,
@@ -508,6 +621,18 @@ class ApiProvider {
     );
   }
 
+  /// Handles unexpected exceptions and returns an [ApiResponse].
+  ///
+  /// This function catches any unexpected errors and returns them as part of the response.
+  ///
+  /// - [error]: The error object that was thrown during the request.
+  /// - [url]: The URL of the request to include in the response.
+  ///
+  /// Returns an [ApiResponse] object with the following fields:
+  /// - `success`: A boolean indicating the success of the request (always `false` for errors).
+  /// - `data`: The error data.
+  /// - `message`: A string describing the error.
+  /// - `url`: The URL of the request.
   ApiResponse _handleUnexpectedException(Object? error, String? url) {
     return ApiResponse(
       success: false,
@@ -516,4 +641,5 @@ class ApiProvider {
       message: error.toString(),
     );
   }
+
 }

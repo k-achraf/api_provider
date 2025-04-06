@@ -11,13 +11,13 @@ void main() {
       connectTimeout: const Duration(seconds: 30),
       headers: {'Accept': 'application/json'},
       onResponse: (response) {
-        print(response);
+
       },
       onError: (error) {
-        print(error);
+
       },
       onRequest: (options) {
-        print(options);
+
       },
       authorization: 'Bearer <Your bearer token>',
       extra: {'key': 'value'},
@@ -79,11 +79,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
 
                 if (response.success) {
-                  print('Success response');
-                  print(response.data);
+
                 } else {
-                  print('Error response');
-                  print(response.data);
+
                 }
               },
             ),
@@ -98,11 +96,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
 
                 if (response.success) {
-                  print('Success response');
-                  print(response.data);
+
                 } else {
-                  print('Error response');
-                  print(response.data);
+
                 }
               },
             ),

@@ -2,3 +2,17 @@ include: package:flutter_lints/flutter.yaml
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+linter:
+  rules:
+    - public_member_api_docs: true
+    - prefer_const_constructors: true
+    - avoid_print: true
+    - prefer_final_locals: true
+    - always_use_package_imports: true
+    - avoid_unnecessary_containers: true
+    - unnecessary_this: true
+    - require_trailing_commas: true
+    - sort_constructors_first: true
+    - omit_local_variable_types: false
+    - prefer_const_literals_to_create_immutables: true

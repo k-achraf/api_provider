@@ -18,3 +18,8 @@
 ### Added
 - add ApiProviderUi to handle api states: idle, loading, empty, success, error
 - Automatically handle api states
+
+## [1.1.1] - 2025-04-06
+### Added
+- add full documentation and comments to our code
+- add test units
