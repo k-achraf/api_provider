@@ -37,31 +37,38 @@ class ApiProvider {
   /// if configured.
   void init(ApiProviderConfig config) {
     _dio = Dio(
-      BaseOptions(
-        baseUrl: config.baseUrl,
-        responseType: config.responseType,
-        connectTimeout: config.connectTimeout,
-        receiveTimeout: config.receiveTimeout,
-        contentType: config.contentType,
-        maxRedirects: config.maxRedirects,
-        headers: config.headers,
-      ),
-    )..interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-          config.onRequest?.call(options);
-          return handler.next(options);
-        },
-        onError: (DioException error, ErrorInterceptorHandler handler) {
-          config.onError?.call(error);
-          return handler.next(error);
-        },
-        onResponse: (Response<dynamic> response, ResponseInterceptorHandler handler) {
-          config.onResponse?.call(response);
-          return handler.next(response);
-        },
-      ),
-    );
+        BaseOptions(
+          baseUrl: config.baseUrl,
+          responseType: config.responseType,
+          connectTimeout: config.connectTimeout,
+          receiveTimeout: config.receiveTimeout,
+          contentType: config.contentType,
+          maxRedirects: config.maxRedirects,
+          headers: config.headers,
+        ),
+      )
+      ..interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (
+            RequestOptions options,
+            RequestInterceptorHandler handler,
+          ) {
+            config.onRequest?.call(options);
+            return handler.next(options);
+          },
+          onError: (DioException error, ErrorInterceptorHandler handler) {
+            config.onError?.call(error);
+            return handler.next(error);
+          },
+          onResponse: (
+            Response<dynamic> response,
+            ResponseInterceptorHandler handler,
+          ) {
+            config.onResponse?.call(response);
+            return handler.next(response);
+          },
+        ),
+      );
 
     if (config.authorization != null) {
       dio.options.headers['Authorization'] = config.authorization;
@@ -570,7 +577,6 @@ class ApiProvider {
     );
   }
 
-
   /// Handles errors from Dio requests and returns an [ApiResponse].
   ///
   /// This function processes the error type and generates an appropriate error message.
@@ -641,5 +647,4 @@ class ApiProvider {
       message: error.toString(),
     );
   }
-
 }

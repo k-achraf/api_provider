@@ -67,20 +67,20 @@ class ApiProviderConfig {
 
   /// Creates a new instance of [ApiProviderConfig] with optional overrides.
   const ApiProviderConfig(
-      this.baseUrl, {
-        this.connectTimeout = const Duration(seconds: 30),
-        this.receiveTimeout = const Duration(seconds: 30),
-        this.responseType = ResponseType.json,
-        this.requestLogger = true,
-        this.maxRedirects = 1,
-        this.showResultMessage = false,
-        this.contentType = 'application/json',
-        this.headers,
-        this.authorization,
-        this.listFormat,
-        this.extra,
-        this.onRequest,
-        this.onError,
-        this.onResponse,
-      });
+    this.baseUrl, {
+    this.connectTimeout = const Duration(seconds: 30),
+    this.receiveTimeout = const Duration(seconds: 30),
+    this.responseType = ResponseType.json,
+    this.requestLogger = true,
+    this.maxRedirects = 1,
+    this.showResultMessage = false,
+    this.contentType = 'application/json',
+    this.headers,
+    this.authorization,
+    this.listFormat,
+    this.extra,
+    this.onRequest,
+    this.onError,
+    this.onResponse,
+  });
 }

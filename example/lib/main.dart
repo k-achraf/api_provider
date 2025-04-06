@@ -10,15 +10,9 @@ void main() {
       receiveTimeout: const Duration(seconds: 30),
       connectTimeout: const Duration(seconds: 30),
       headers: {'Accept': 'application/json'},
-      onResponse: (response) {
-
-      },
-      onError: (error) {
-
-      },
-      onRequest: (options) {
-
-      },
+      onResponse: (response) {},
+      onError: (error) {},
+      onRequest: (options) {},
       authorization: 'Bearer <Your bearer token>',
       extra: {'key': 'value'},
       requestLogger: true,
@@ -79,10 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
 
                 if (response.success) {
-
-                } else {
-
-                }
+                } else {}
               },
             ),
             const SizedBox(height: 10),
@@ -96,10 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
 
                 if (response.success) {
-
-                } else {
-
-                }
+                } else {}
               },
             ),
           ],

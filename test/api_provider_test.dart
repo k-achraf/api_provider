@@ -29,28 +29,36 @@ void main() {
     expect(find.text('Idle'), findsOneWidget);
   });
 
-  testWidgets('Shows Loading Widget when status is loading', (WidgetTester tester) async {
+  testWidgets('Shows Loading Widget when status is loading', (
+    WidgetTester tester,
+  ) async {
     controller.loading();
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
     expect(find.text('Loading...'), findsOneWidget);
   });
 
-  testWidgets('Shows Success Widget when status is success', (WidgetTester tester) async {
+  testWidgets('Shows Success Widget when status is success', (
+    WidgetTester tester,
+  ) async {
     controller.success();
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
     expect(find.text('Success!'), findsOneWidget);
   });
 
-  testWidgets('Shows Error Widget when status is error', (WidgetTester tester) async {
+  testWidgets('Shows Error Widget when status is error', (
+    WidgetTester tester,
+  ) async {
     controller.error();
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
     expect(find.text('Error occurred'), findsOneWidget);
   });
 
-  testWidgets('Shows Empty Widget when status is empty', (WidgetTester tester) async {
+  testWidgets('Shows Empty Widget when status is empty', (
+    WidgetTester tester,
+  ) async {
     controller.empty();
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
