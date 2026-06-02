@@ -57,15 +57,11 @@ void main() {
     });
 
     test('creates with callbacks', () {
-      bool onRequestCalled = false;
-      bool onErrorCalled = false;
-      bool onResponseCalled = false;
-
       final config = ApiProviderConfig(
         'https://api.example.com',
-        onRequest: (_) => onRequestCalled = true,
-        onError: (_) => onErrorCalled = true,
-        onResponse: (_) => onResponseCalled = true,
+        onRequest: (_) {},
+        onError: (_) {},
+        onResponse: (_) {},
       );
 
       expect(config.onRequest, isNotNull);
