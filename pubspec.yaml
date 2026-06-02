@@ -29,12 +29,7 @@ topics:
   - http
   - dio
   - network
-  - rest
-  - ui
-  - state-management
-  - flutter
   - request
-  - widget
 
 funding:
   - https://github.com/sponsors/k-achraf
