@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.1.0] - 2026-06-02
+### Added
+- Full example application demonstrating all package features (CRUD, download, interceptors, auth)
+- SEO-friendly pub.dev metadata and documentation
+
+### Fixed
+- Static analysis issues resolved
+- Removed unused local variables in config tests
+
+### Changed
+- Excluded coverage directory from published package
+
 ## [2.0.0] - 2026-06-02
 ### Breaking Changes
 - Bumped minimum Dart SDK from `>=2.18.0` to `>=3.0.0` (enables Dart 3 features)
