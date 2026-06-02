@@ -1,4 +1,4 @@
-import 'package:easy_api_provider/easy_api_provider.dart';
+import 'package:easy_api_provider/src/models/api_response.dart';
 import 'package:flutter/material.dart';
 
 /// A callback signature for listening to [ApiProviderStatus] changes.

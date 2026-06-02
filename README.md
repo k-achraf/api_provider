@@ -1,4 +1,4 @@
-# api_provider
+# easy_api_provider
 
 [![pub package](https://img.shields.io/pub/v/easy_api_provider.svg)](https://pub.dev/packages/easy_api_provider)
 [![pub points](https://img.shields.io/pub/points/easy_api_provider?color=2E8B57&label=pub%20points)](https://pub.dev/packages/easy_api_provider/score)
@@ -10,15 +10,22 @@
 </div>
 
 <br /><br/>
-A Flutter package for making API requests easily with built-in caching, request retries, and error handling.
+A Flutter package providing a Dio-based HTTP client with built-in UI state management. Make API requests easily with automatic error handling and reactive UI updates.
 
 ## Features
 
-- Simple and easy-to-use API request handling
-- Automatic caching for responses
-- Request retries with exponential backoff
-- Customizable headers and query parameters
-- Support for GET, POST, PUT, DELETE, PATCH, DOWNLOAD and more
+- Simple and easy-to-use API request handling with Dio
+- Customizable headers, timeouts, and query parameters
+- Support for GET, POST, PUT, DELETE, PATCH, and DOWNLOAD
+- Built-in UI state management (idle, loading, success, error, empty)
+- Automatic request/response error handling — never throws exceptions
+- Request/response logging with TalkerDioLogger
+- Smooth animated transitions between UI states
+
+## Requirements
+
+- Dart SDK `>=3.0.0`
+- Flutter >= 3.0.0
 
 ## Installation
 
@@ -26,7 +33,7 @@ Add the following line to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  api_provider: latest
+  easy_api_provider: ^2.0.0
 ```
 
 Then, run:
@@ -40,7 +47,7 @@ flutter pub get
 ### Import the package
 
 ```dart
-import 'package:api_provider/easy_api_provider.dart';
+import 'package:easy_api_provider/easy_api_provider.dart';
 ```
 
 ### Initialize the provider
@@ -57,15 +64,9 @@ void main() {
     headers: {
       'Accept': 'application/json'
     },
-    onResponse: (Response response){
-
-    },
-    onError: (DioException error){
-
-    },
-    onRequest: (RequestOptions options){
-
-    },
+    onResponse: (Response response) {},
+    onError: (DioException error) {},
+    onRequest: (RequestOptions options) {},
     authorization: 'Bearer <Your bearer token>',
     extra: {
       'key': 'value'
@@ -82,16 +83,19 @@ void main() {
 ```dart
 Future<void> fetchData() async {
   final ApiResponse response = await ApiProvider.instance.get(
-      '/example',
-      cancelToken: cancelToken,
-      params: {
-        'param1': 'value1',
-      },
-      progressCallback: (int c, int s){
-    
-      },
-      requestOptions: Options()
+    '/example',
+    params: {
+      'param1': 'value1',
+    },
+    progressCallback: (int c, int s) {},
+    requestOptions: Options(),
   );
+
+  if (response.success) {
+    // Handle success
+  } else {
+    // Handle error
+  }
 }
 ```
 
@@ -100,62 +104,63 @@ Future<void> fetchData() async {
 ```dart
 Future<void> sendData() async {
   final ApiResponse response = await ApiProvider.instance.post(
-      '/example',
-      cancelToken: cancelToken,
-      params: {
-        'param1': 'value1',
-      },
-      onSendProgress: (int c, int s){
-
-      },
-      onReceiveProgress: (int c, int s){
-
-      },
-      data: {
-        'key': 'value'
-      },
-      requestOptions: Options()
+    '/example',
+    data: {'key': 'value'},
+    params: {
+      'param1': 'value1',
+    },
+    onSendProgress: (int c, int s) {},
+    onReceiveProgress: (int c, int s) {},
+    requestOptions: Options(),
   );
 }
 ```
 
-## **ApiResponse Class**
-### **Description**
-The `ApiResponse` class is used to encapsulate the results of network requests executed using Dio. It provides details about the success or failure of the request, retrieved data, and HTTP status code.
+## ApiResponse Class
 
-### **Properties:**
-- `success` _(bool)_: Indicates whether the request was successful (`true`) or failed (`false`).
-- `statusCode` _(int?)_: The HTTP response status code (`200`, `400`, `500`, etc.).
-- `data` _(dynamic)_:
-    - Contains the retrieved data when the request is successful (`response.data`).
-    - Contains error details when the request fails (`error.response?.data`).
-- `url` _(String?)_: The request URL.
-- `message` _(String?)_: A descriptive message for debugging or logging purposes.
+The `ApiResponse` class encapsulates the results of network requests executed using Dio.
 
-## **Using The UI Handler**
-## Description
-The `ApiProviderUi` is a widget that dynamically different UI states based on the API request status managed by `ApiProviderController`. it provides a structured way to handle various api states including:
-- `idle`: The initial state before an API request is made
-- `loading`: Displays a loading indicator or custom widget while the request is in progress
-- `success`: shows the successful widget with response data
-- `error`: displays the error widget with error data
-- `empty`: shown when success response with empty data
-- 
-## How To Use
+### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `success` | `bool` | Whether the request was successful |
+| `statusCode` | `int?` | HTTP status code (`200`, `400`, `500`, etc.) |
+| `data` | `dynamic` | Response data on success, error details on failure |
+| `url` | `String?` | The request URL |
+| `message` | `String?` | Descriptive message for debugging |
+
+## Using the UI Handler
+
+The `ApiProviderUi` widget dynamically switches UI based on the API request status managed by `ApiProviderController`.
+
+### States
+
+| State | Description |
+|-------|-------------|
+| `idle` | Initial state before any API request |
+| `loading` | Request is in progress |
+| `success` | Request completed successfully |
+| `error` | Request resulted in an error |
+| `empty` | Successful response with no data |
+
+### Setup
+
 ```dart
-ApiProviderController controller = ApiProviderController();
+final controller = ApiProviderController();
 
 ApiProviderUi(
   controller: controller,
-  idleWidget: (context) => IdleWidget(),
-  loadingWidget: (context) => LoadingWidget(),
-  emptyWidget: (context) => EmptyWidget(),
-  successWidget: (context, ApiResponse? response) => SuccessWidget(response),
-  errorWidget: (context, ApiResponse? response) => ErrorWidget(response),
-),
+  idleWidget: (context) => const IdleWidget(),
+  loadingWidget: (context) => const LoadingWidget(),
+  emptyWidget: (context) => const EmptyWidget(),
+  successWidget: (context, response) => SuccessWidget(response),
+  errorWidget: (context, response) => ErrorWidget(response),
+)
 ```
 
-Then you can handle Ui states using controller:
+### Manual state control
+
 ```dart
 controller.idle();
 controller.loading();
@@ -164,28 +169,32 @@ controller.success();
 controller.error();
 ```
 
-You can listen for status:
+### Listen for status changes
+
 ```dart
-controller.listen((ApiProviderStatus status){
-  print(status) //ApiProviderStatus.idle, ApiProviderStatus.loading, ApiProviderStatus.success, ApiProviderStatus.error, ApiProviderStatus.empty
+controller.listen((ApiProviderStatus status) {
+  // ApiProviderStatus.idle, .loading, .success, .error, .empty
 });
 ```
 
-## Handle api request, response automatically
-You can automatically handle api request, response status by pass the controller to your request like this:
+### Automatic state management
+
+Pass a `controller` to any request method and the state is managed automatically:
+
 ```dart
 final ApiResponse response = await ApiProvider.instance.get(
-  '/avatar/info',
-  params: {'param': 'value'},
-  controller: controller
+  '/users',
+  controller: controller,
 );
 ```
-So here the `ApiProvider` will handle the states for you
-- Set the loading state before send the request
-- Set the success state when receive success response and pass the `ApiResponse`
-- Set the error state when receive error response and pass the `ApiResponse`
+
+This automatically:
+- Sets **loading** state before sending the request
+- Sets **success** state with the `ApiResponse` on success
+- Sets **error** state with the `ApiResponse` on failure
 
 ## Contributing
+
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
 ## License

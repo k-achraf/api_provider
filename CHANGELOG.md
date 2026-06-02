@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.0.0] - 2026-06-02
+### Breaking Changes
+- Bumped minimum Dart SDK from `>=2.18.0` to `>=3.0.0` (enables Dart 3 features)
+
+### Added
+- Comprehensive test suite: 42 unit/widget tests + integration test suite
+- `AnimatedSwitcher` for smooth cross-fade transitions between UI states in `ApiProviderUi`
+- Exhaustive `DioExceptionType` error handling covering all 8 cases (connectionTimeout, sendTimeout, receiveTimeout, badResponse, cancel, connectionError, badCertificate, unknown)
+
+### Fixed
+- **Header overwrite bug**: `init()` no longer overwrites all headers including Authorization when `config.headers` is provided
+- **URL double-slash bug**: request URLs are now correctly constructed without duplicate slashes
+- **Listener leak in `ApiProviderUi`**: properly removes listeners in `dispose()` with `mounted` guard
+- **Circular imports**: all internal files now use direct `package:` imports instead of barrel file imports
+
+### Changed
+- Refactored HTTP methods (`get`, `post`, `put`, `patch`, `delete`, `download`) to use a shared `_request` helper, eliminating ~400 lines of duplicated try/catch logic
+- Default widgets (`IdleWidget`, `LoadingWidget`, etc.) now include `ValueKey` for proper widget reconciliation
+
 ## [1.0.0] - 2025-03-29
 ### Added
 - Initial release 🎉
