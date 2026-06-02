@@ -37,7 +37,7 @@ topics:
   - widget
 
 funding:
-  - url: https://github.com/sponsors/k-achraf
+  - https://github.com/sponsors/k-achraf
 
 screenshots:
   - description: "ApiProviderUi widget switching between loading, success, error, and empty states"
