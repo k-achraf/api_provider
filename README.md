@@ -271,6 +271,10 @@ controller.listen((status) {
 | `error` | Request failed |
 | `empty` | Successful but no data |
 
+## Preview
+
+![easy_api_provider demo](screenshots/preview.gif)
+
 ## Example
 
 See the complete example app in [`example/`](https://github.com/k-achraf/api_provider/tree/main/example).

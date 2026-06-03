@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.2.0] - 2026-06-03
+### Added
+- Animated preview GIF showcasing the example application
+- Preview section in README
+
 ## [2.1.0] - 2026-06-02
 ### Added
 - Full example application demonstrating all package features (CRUD, download, interceptors, auth)
