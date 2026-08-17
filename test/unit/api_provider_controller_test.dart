@@ -26,7 +26,7 @@ void main() {
       expect(controller.status, ApiProviderStatus.loading);
     });
 
-    test('success() sets status and stores response', () {
+    test('success() with data sets status to success', () {
       const apiResponse = ApiResponse(
         success: true,
         statusCode: 200,
@@ -40,10 +40,25 @@ void main() {
       expect(controller.response, apiResponse);
     });
 
-    test('success() works without response', () {
+    test('success() with no data auto-transitions to empty', () {
       controller.success();
-      expect(controller.status, ApiProviderStatus.success);
+      expect(controller.status, ApiProviderStatus.empty);
       expect(controller.response, isNull);
+    });
+
+    test('success() with null data auto-transitions to empty', () {
+      controller.success(apiResponse: const ApiResponse(success: true, data: null));
+      expect(controller.status, ApiProviderStatus.empty);
+    });
+
+    test('success() with empty List auto-transitions to empty', () {
+      controller.success(apiResponse: const ApiResponse(success: true, data: []));
+      expect(controller.status, ApiProviderStatus.empty);
+    });
+
+    test('success() with empty Map auto-transitions to empty', () {
+      controller.success(apiResponse: const ApiResponse(success: true, data: {}));
+      expect(controller.status, ApiProviderStatus.empty);
     });
 
     test('error() sets status and stores response', () {
@@ -83,11 +98,26 @@ void main() {
       controller.listen((status) => statuses.add(status));
 
       controller.loading();
-      controller.success();
+      controller.success(
+        apiResponse: const ApiResponse(success: true, data: {'key': 'value'}),
+      );
 
       expect(statuses, [
         ApiProviderStatus.loading,
         ApiProviderStatus.success,
+      ]);
+    });
+
+    test('full lifecycle: idle -> loading -> empty (no data)', () {
+      final statuses = <ApiProviderStatus>[];
+      controller.listen((status) => statuses.add(status));
+
+      controller.loading();
+      controller.success(); // no data -> auto empty
+
+      expect(statuses, [
+        ApiProviderStatus.loading,
+        ApiProviderStatus.empty,
       ]);
     });
 
@@ -126,6 +156,63 @@ void main() {
 
       expect(statusesA, [ApiProviderStatus.loading]);
       expect(statusesB, [ApiProviderStatus.loading]);
+    });
+
+    // ── New v2.5.0 features ──────────────────────────────────────────────
+
+    test('isLoading is true only when loading', () {
+      expect(controller.isLoading, isFalse);
+      controller.loading();
+      expect(controller.isLoading, isTrue);
+    });
+
+    test('isSuccess is true only when success', () {
+      controller.success(
+        apiResponse: const ApiResponse(success: true, data: {'x': 1}),
+      );
+      expect(controller.isSuccess, isTrue);
+      expect(controller.isError, isFalse);
+    });
+
+    test('isError is true only when error', () {
+      controller.error();
+      expect(controller.isError, isTrue);
+      expect(controller.isSuccess, isFalse);
+    });
+
+    test('isEmpty is true only when empty', () {
+      controller.empty();
+      expect(controller.isEmpty, isTrue);
+    });
+
+    test('isIdle is true only when idle', () {
+      expect(controller.isIdle, isTrue);
+      controller.loading();
+      expect(controller.isIdle, isFalse);
+    });
+
+    test('reset() restores idle and clears response', () {
+      controller.success(
+        apiResponse: const ApiResponse(success: true, data: [1, 2, 3]),
+      );
+      expect(controller.isSuccess, isTrue);
+
+      controller.reset();
+
+      expect(controller.status, ApiProviderStatus.idle);
+      expect(controller.response, isNull);
+    });
+
+    test('previousStatus is null initially', () {
+      expect(controller.previousStatus, isNull);
+    });
+
+    test('previousStatus is updated on transition', () {
+      controller.loading();
+      expect(controller.previousStatus, ApiProviderStatus.idle);
+
+      controller.error();
+      expect(controller.previousStatus, ApiProviderStatus.loading);
     });
   });
 }

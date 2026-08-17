@@ -1,5 +1,51 @@
 # Changelog
 
+## [2.5.0] - 2026-08-17
+
+### Added
+- `upload()` — dedicated multipart/`FormData` POST method with `onSendProgress`
+  and `onReceiveProgress` tracking; sets `multipart/form-data` content type
+  automatically, keeping it distinct from the generic `post()` method
+- `head()` — HTTP HEAD method for checking resource existence or inspecting
+  headers without downloading the response body
+- `isInitialized` getter on `ApiProvider` — safe guard against calling methods
+  before `init()` or after the provider has been closed
+- `sendTimeout` in `ApiProviderConfig` (default 30 s) — wired into
+  `BaseOptions.sendTimeout` so upload/send stalls are caught correctly
+- `followRedirects` in `ApiProviderConfig` (default `true`) — exposes the
+  Dio on/off redirect toggle alongside the existing `maxRedirects`
+- `validateStatus` in `ApiProviderConfig` — lets callers decide which HTTP
+  status codes count as success (e.g., treat 201/204 as success)
+- `headers` field on `ApiResponse` — exposes the raw response headers
+  (`Map<String, List<String>>`) for cache-control, pagination cursors, etc.
+- `requestDuration` field on `ApiResponse` — records the total elapsed time
+  of the request via `Stopwatch` for client-side performance monitoring
+- `copyWith()` on `ApiResponse` — immutable transform helper for tests and
+  middleware layers
+- `toString()` override on `ApiResponse` — human-readable summary for logging
+- `isLoading`, `isSuccess`, `isError`, `isEmpty`, `isIdle` boolean getters on
+  `ApiProviderController` — convenient shorthands for the most common
+  status checks
+- `reset()` on `ApiProviderController` — restores to `idle` and clears
+  `response` in a single call
+- `previousStatus` field on `ApiProviderController` — tracks the state before
+  the latest transition, useful for conditional UI (e.g., "was loading before")
+- Auto-`empty` detection in `ApiProviderController.success()` — automatically
+  transitions to `empty` when `data` is `null`, an empty `List`, or an empty
+  `Map`, removing the need for manual `controller.empty()` calls
+- `transitionDuration`, `switchInCurve`, `switchOutCurve` params on
+  `ApiProviderUi` — lets callers control the `AnimatedSwitcher` timing and
+  easing without forking the widget
+- `transitionBuilder` param on `ApiProviderUi` — expose the full
+  `AnimatedSwitcher.transitionBuilder` for custom slide/scale/fade effects
+
+### Fixed
+- `ApiProviderUi.didUpdateWidget` — the widget now correctly removes the old
+  controller listener and attaches to the new one when the controller instance
+  is swapped at runtime, preventing stale listener leaks
+- `post()` `data` parameter widened from `Map<String, dynamic>?` to `dynamic`
+  to avoid a type error when callers pass a `FormData` object directly
+
 ## [2.4.0] - 2026-08-17
 ### Security
 - `requestLogger` now defaults to `false` — prevents Authorization tokens and

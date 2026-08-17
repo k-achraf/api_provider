@@ -41,10 +41,22 @@ void main() {
   testWidgets('Shows Success Widget when status is success', (
     WidgetTester tester,
   ) async {
-    controller.success();
+    // Pass real data so the auto-empty detection does not kick in
+    controller.success(
+      apiResponse: const ApiResponse(success: true, data: {'id': 1}),
+    );
     await tester.pumpWidget(createWidgetUnderTest());
     await tester.pump();
     expect(find.text('Success!'), findsOneWidget);
+  });
+
+  testWidgets('Shows Empty Widget when success() is called without data', (
+    WidgetTester tester,
+  ) async {
+    controller.success(); // no data -> auto-empty
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pump();
+    expect(find.text('Nothing here'), findsOneWidget);
   });
 
   testWidgets('Shows Error Widget when status is error', (

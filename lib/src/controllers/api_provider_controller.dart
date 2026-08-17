@@ -47,6 +47,7 @@ class ApiProviderController extends ChangeNotifier {
   ApiProviderController();
 
   ApiProviderStatus _status = ApiProviderStatus.idle;
+  ApiProviderStatus? _previousStatus;
 
   // P2: maps each public callback to its anonymous wrapper so we can remove it
   final _wrappedListeners = <ApiProviderListener, VoidCallback>{};
@@ -54,11 +55,37 @@ class ApiProviderController extends ChangeNotifier {
   /// The current status of the API.
   ApiProviderStatus get status => _status;
 
+  /// The status immediately before the current one.
+  ///
+  /// Useful for conditional UI — e.g., showing a "previously loaded" state
+  /// while a refresh is in progress.
+  ApiProviderStatus? get previousStatus => _previousStatus;
+
   /// The API response associated with the current status, if any.
   ApiResponse? response;
 
+  // ── Convenience getters ──────────────────────────────────────────────────
+
+  /// Whether the controller is currently in the [ApiProviderStatus.loading] state.
+  bool get isLoading => _status == ApiProviderStatus.loading;
+
+  /// Whether the controller is currently in the [ApiProviderStatus.success] state.
+  bool get isSuccess => _status == ApiProviderStatus.success;
+
+  /// Whether the controller is currently in the [ApiProviderStatus.error] state.
+  bool get isError => _status == ApiProviderStatus.error;
+
+  /// Whether the controller is currently in the [ApiProviderStatus.empty] state.
+  bool get isEmpty => _status == ApiProviderStatus.empty;
+
+  /// Whether the controller is currently in the [ApiProviderStatus.idle] state.
+  bool get isIdle => _status == ApiProviderStatus.idle;
+
+  // ── State transitions ────────────────────────────────────────────────────
+
   /// Updates the current status and notifies listeners.
   void _setStatus(ApiProviderStatus newStatus) {
+    _previousStatus = _status;
     _status = newStatus;
     notifyListeners();
   }
@@ -70,9 +97,16 @@ class ApiProviderController extends ChangeNotifier {
   void loading() => _setStatus(ApiProviderStatus.loading);
 
   /// Sets the status to [ApiProviderStatus.success] and stores the response.
+  ///
+  /// Automatically transitions to [ApiProviderStatus.empty] if [apiResponse]
+  /// has no data (i.e. `data` is `null` or an empty [List] / [Map]).
   void success({ApiResponse? apiResponse}) {
     response = apiResponse;
-    _setStatus(ApiProviderStatus.success);
+    final data = apiResponse?.data;
+    final hasData = data != null &&
+        (data is! List || data.isNotEmpty) &&
+        (data is! Map || data.isNotEmpty);
+    _setStatus(hasData ? ApiProviderStatus.success : ApiProviderStatus.empty);
   }
 
   /// Sets the status to [ApiProviderStatus.error] and stores the response.
@@ -83,6 +117,17 @@ class ApiProviderController extends ChangeNotifier {
 
   /// Sets the status to [ApiProviderStatus.empty].
   void empty() => _setStatus(ApiProviderStatus.empty);
+
+  /// Resets the controller to [ApiProviderStatus.idle] and clears the
+  /// stored [response].
+  ///
+  /// Useful for clearing state before a fresh request or on screen disposal.
+  void reset() {
+    response = null;
+    _setStatus(ApiProviderStatus.idle);
+  }
+
+  // ── Listener management ──────────────────────────────────────────────────
 
   /// Attaches a listener to be called whenever the status changes.
   ///

@@ -40,6 +40,12 @@ class ApiProvider {
   /// Internal Dio client instance.
   Dio? _dio;
 
+  /// Returns `true` if [init] has been called and the Dio client is ready.
+  ///
+  /// Use this to guard against calling methods before initialisation or after
+  /// the provider has been closed.
+  bool get isInitialized => _dio != null;
+
   /// Returns the initialized Dio instance.
   ///
   /// Throws an [Exception] if [init] has not been called yet.
@@ -66,9 +72,12 @@ class ApiProvider {
         responseType: config.responseType,
         connectTimeout: config.connectTimeout,
         receiveTimeout: config.receiveTimeout,
+        sendTimeout: config.sendTimeout,
         contentType: config.contentType,
         maxRedirects: config.maxRedirects,
+        followRedirects: config.followRedirects,
         headers: config.headers,
+        validateStatus: config.validateStatus,
       ),
     )..interceptors.add(
         InterceptorsWrapper(
@@ -162,6 +171,29 @@ class ApiProvider {
     );
   }
 
+  /// Sends a HEAD request to the specified [path].
+  ///
+  /// Returns an [ApiResponse] with no body — useful for checking whether a
+  /// resource exists or inspecting its headers without downloading the content.
+  Future<ApiResponse> head(
+    String path, {
+    Map<String, dynamic>? params,
+    Options? requestOptions,
+    CancelToken? cancelToken,
+    ApiProviderController? controller,
+  }) {
+    return _request(
+      path: path,
+      controller: controller,
+      request: () => dio.head(
+        path,
+        queryParameters: params,
+        cancelToken: cancelToken,
+        options: requestOptions,
+      ),
+    );
+  }
+
   /// Sends a POST request to the specified [path].
   ///
   /// Returns an [ApiResponse] that contains either the result of the request
@@ -169,7 +201,7 @@ class ApiProvider {
   Future<ApiResponse> post(
     String path, {
     Map<String, dynamic>? params,
-    Map<String, dynamic>? data,
+    dynamic data,
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
@@ -274,6 +306,53 @@ class ApiProvider {
     );
   }
 
+  /// Uploads a [FormData] payload to [path] using a multipart POST request.
+  ///
+  /// This is the preferred method for file uploads or any `multipart/form-data`
+  /// request. Use [onSendProgress] to track upload progress.
+  ///
+  /// ```dart
+  /// final response = await ApiProvider.instance.upload(
+  ///   '/profile/avatar',
+  ///   FormData.fromMap({
+  ///     'file': await MultipartFile.fromFile('/path/to/image.jpg'),
+  ///     'userId': '42',
+  ///   }),
+  ///   onSendProgress: (sent, total) {
+  ///     print('${(sent / total * 100).toStringAsFixed(1)}%');
+  ///   },
+  /// );
+  /// ```
+  Future<ApiResponse> upload(
+    String path,
+    FormData formData, {
+    Map<String, dynamic>? params,
+    Options? requestOptions,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    ApiProviderController? controller,
+  }) {
+    return _request(
+      path: path,
+      controller: controller,
+      request: () => dio.post(
+        path,
+        data: formData,
+        queryParameters: params,
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: requestOptions?.headers,
+          receiveTimeout: requestOptions?.receiveTimeout,
+          sendTimeout: requestOptions?.sendTimeout,
+        ),
+      ),
+    );
+  }
+
   /// Downloads a file from the given [urlPath] and saves it to [savePath].
   ///
   /// Returns an [ApiResponse] with either the result of the download or error
@@ -311,7 +390,7 @@ class ApiProvider {
     );
   }
 
-  /// Executes an HTTP request with unified error handling and optional
+  /// Executes an HTTP request with unified error handling, timing, and optional
   /// controller state management.
   Future<ApiResponse> _request({
     required String path,
@@ -323,10 +402,12 @@ class ApiProvider {
     }
 
     final url = '${dio.options.baseUrl}$path';
+    final stopwatch = Stopwatch()..start();
 
     try {
       final response = await request();
-      final result = _handleResponse(response, url);
+      stopwatch.stop();
+      final result = _handleResponse(response, url, stopwatch.elapsed);
 
       if (controller != null) {
         controller.success(apiResponse: result);
@@ -334,7 +415,8 @@ class ApiProvider {
 
       return result;
     } on DioException catch (e) {
-      final error = _handleDioError(e, url);
+      stopwatch.stop();
+      final error = _handleDioError(e, url, stopwatch.elapsed);
 
       if (controller != null) {
         controller.error(apiResponse: error);
@@ -342,7 +424,8 @@ class ApiProvider {
 
       return error;
     } on TimeoutException {
-      final error = _handleTimeOutException(url);
+      stopwatch.stop();
+      final error = _handleTimeOutException(url, stopwatch.elapsed);
 
       if (controller != null) {
         controller.error(apiResponse: error);
@@ -350,7 +433,8 @@ class ApiProvider {
 
       return error;
     } catch (e) {
-      final error = _handleUnexpectedException(e, url);
+      stopwatch.stop();
+      final error = _handleUnexpectedException(e, url, stopwatch.elapsed);
 
       if (controller != null) {
         controller.error(apiResponse: error);
@@ -360,20 +444,34 @@ class ApiProvider {
     }
   }
 
-  ApiResponse _handleResponse(Response<dynamic> response, String? url) {
+  ApiResponse _handleResponse(
+    Response<dynamic> response,
+    String? url,
+    Duration duration,
+  ) {
     // P3: guard against non-Map response bodies (arrays, strings, binary)
     final message =
         response.data is Map ? response.data['message'] as String? : null;
+
+    // Extract headers into a plain Map<String, List<String>>
+    final headers = response.headers.map;
+
     return ApiResponse(
       success: true,
       statusCode: response.statusCode,
       data: response.data,
       url: url,
       message: message ?? 'Success',
+      headers: headers,
+      requestDuration: duration,
     );
   }
 
-  ApiResponse _handleDioError(DioException error, String? url) {
+  ApiResponse _handleDioError(
+    DioException error,
+    String? url,
+    Duration duration,
+  ) {
     final errorMessage = switch (error.type) {
       DioExceptionType.connectionTimeout => 'Connection timeout',
       DioExceptionType.sendTimeout => 'Send timeout',
@@ -386,29 +484,42 @@ class ApiProvider {
       DioExceptionType.unknown => 'Unexpected error occurred',
     };
 
+    // Extract structured error data when the body is a Map
+    final errorData = error.response?.data is Map
+        ? error.response?.data
+        : error.response?.data;
+
     return ApiResponse(
       success: false,
       statusCode: error.response?.statusCode,
-      data: error.response?.data,
+      data: errorData,
       url: url,
       message: errorMessage,
+      headers: error.response?.headers.map,
+      requestDuration: duration,
     );
   }
 
-  ApiResponse _handleTimeOutException(String? url) {
+  ApiResponse _handleTimeOutException(String? url, Duration duration) {
     return ApiResponse(
       success: false,
       message: 'Server not responding',
       url: url,
+      requestDuration: duration,
     );
   }
 
-  ApiResponse _handleUnexpectedException(Object? error, String? url) {
+  ApiResponse _handleUnexpectedException(
+    Object? error,
+    String? url,
+    Duration duration,
+  ) {
     return ApiResponse(
       success: false,
       url: url,
       data: error,
       message: error.toString(),
+      requestDuration: duration,
     );
   }
 }
