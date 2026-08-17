@@ -48,6 +48,9 @@ class ApiProviderController extends ChangeNotifier {
 
   ApiProviderStatus _status = ApiProviderStatus.idle;
 
+  // P2: maps each public callback to its anonymous wrapper so we can remove it
+  final _wrappedListeners = <ApiProviderListener, VoidCallback>{};
+
   /// The current status of the API.
   ApiProviderStatus get status => _status;
 
@@ -83,10 +86,30 @@ class ApiProviderController extends ChangeNotifier {
 
   /// Attaches a listener to be called whenever the status changes.
   ///
-  /// The [callback] receives the current status whenever it changes.
+  /// The [callback] receives the current [ApiProviderStatus] on every change.
+  ///
+  /// Calling [listen] with the same [callback] more than once is a no-op —
+  /// the callback will only be registered once.
+  ///
+  /// Use [unlisten] to remove the callback when it is no longer needed.
   void listen(ApiProviderListener callback) {
-    addListener(() {
-      callback.call(status);
-    });
+    if (_wrappedListeners.containsKey(callback)) return;
+    void wrapper() => callback(status);
+    _wrappedListeners[callback] = wrapper;
+    addListener(wrapper);
+  }
+
+  /// Removes a listener previously registered with [listen].
+  ///
+  /// If [callback] was not registered, this is a no-op.
+  void unlisten(ApiProviderListener callback) {
+    final wrapper = _wrappedListeners.remove(callback);
+    if (wrapper != null) removeListener(wrapper);
+  }
+
+  @override
+  void dispose() {
+    _wrappedListeners.clear();
+    super.dispose();
   }
 }

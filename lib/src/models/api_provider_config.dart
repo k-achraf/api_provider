@@ -23,7 +23,11 @@ class ApiProviderConfig {
   /// The base URL of the API (e.g., `https://api.example.com`).
   final String baseUrl;
 
-  /// Authorization data to be added to the headers (e.g., token).
+  /// Authorization value to be sent in the `Authorization` header (e.g.,
+  /// `'Bearer my_token'` or `'Basic dXNlcjpwYXNz'`).
+  ///
+  /// Must be a [String] or `null`. Passing any other type will throw an
+  /// [AssertionError] in debug mode.
   final dynamic authorization;
 
   /// Timeout duration for establishing a connection.
@@ -38,7 +42,11 @@ class ApiProviderConfig {
   /// The content type to be used in requests (e.g., `application/json`).
   final String contentType;
 
-  /// Enables or disables request logging for debugging.
+  /// Enables request/response logging via [TalkerDioLogger].
+  ///
+  /// Defaults to `false`. Enable only in **debug builds** — when `true` the
+  /// logger prints full request headers (including `Authorization` tokens)
+  /// and response bodies to the console.
   final bool requestLogger;
 
   /// Maximum number of redirects allowed during a request.
@@ -71,7 +79,7 @@ class ApiProviderConfig {
     this.connectTimeout = const Duration(seconds: 30),
     this.receiveTimeout = const Duration(seconds: 30),
     this.responseType = ResponseType.json,
-    this.requestLogger = true,
+    this.requestLogger = false,
     this.maxRedirects = 1,
     this.showResultMessage = false,
     this.contentType = 'application/json',
@@ -82,5 +90,8 @@ class ApiProviderConfig {
     this.onRequest,
     this.onError,
     this.onResponse,
-  });
+  }) : assert(
+         authorization == null || authorization is String,
+         'authorization must be a String (e.g. "Bearer token") or null.',
+       );
 }

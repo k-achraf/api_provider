@@ -1,5 +1,38 @@
 # Changelog
 
+## [2.4.0] - 2026-08-17
+### Security
+- `requestLogger` now defaults to `false` — prevents Authorization tokens and
+  response bodies from being logged in production builds (S2)
+- Added `assert` on `ApiProviderConfig.authorization` to catch non-String
+  values at development time (S1)
+- Narrowed `setAuthorisation()` parameter from `dynamic` to `String?` (S1)
+
+### Performance
+- `init()` now calls `_dio?.close(force: true)` before creating a new Dio
+  instance, preventing resource leaks on repeated initialisation (P1)
+- Fixed `listen()` memory leak — callbacks are now stored in a `Map` and can
+  be removed via the new `unlisten()` method; repeated `listen()` calls with
+  the same callback are idempotent (P2)
+- Fixed crash when API response body is a `List`, `String`, or binary blob —
+  `response.data['message']` is now guarded with an `is Map` check (P3)
+- `ApiProviderUi` now skips `setState` when the controller status hasn't
+  actually changed, eliminating redundant widget rebuilds (P4)
+
+### Added
+- `ApiProvider.create()` factory for creating independent instances when
+  multiple backends with different configs are needed concurrently (D1)
+- `ApiProviderController.unlisten()` — pair to `listen()` for removing
+  callbacks without holding a closure reference (P2)
+- `ApiProviderController.dispose()` override that clears all wrapped
+  listeners on teardown (P2)
+
+### Fixed
+- Added `assert(savePath.isNotEmpty)` to `download()` and documented that
+  the method is not supported on Web (D3)
+- Updated stale widget tests for `IdleWidget` and `EmptyWidget` to match
+  the output introduced in v2.3.0 (D2)
+
 ## [2.3.0] - 2026-08-17
 ### Added
 - Library-level dartdoc comment for the `easy_api_provider` export file

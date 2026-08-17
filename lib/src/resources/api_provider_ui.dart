@@ -57,6 +57,9 @@ class ApiProviderUi extends StatefulWidget {
 }
 
 class _ApiProviderUiState extends State<ApiProviderUi> {
+  // P4: cache last status to skip rebuilds when the status hasn't changed
+  ApiProviderStatus? _lastStatus;
+
   @override
   void initState() {
     super.initState();
@@ -70,7 +73,8 @@ class _ApiProviderUiState extends State<ApiProviderUi> {
   }
 
   void _onStatusChanged() {
-    if (mounted) {
+    if (mounted && widget.controller.status != _lastStatus) {
+      _lastStatus = widget.controller.status;
       setState(() {});
     }
   }

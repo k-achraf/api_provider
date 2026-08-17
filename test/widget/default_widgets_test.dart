@@ -8,12 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('IdleWidget', () {
-    testWidgets('renders Idle text', (tester) async {
+    testWidgets('renders an invisible SizedBox (no visible content)', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: IdleWidget()),
       );
 
-      expect(find.text('Idle'), findsOneWidget);
+      expect(find.byType(SizedBox), findsWidgets);
+      expect(find.text('Idle'), findsNothing);
     });
   });
 
@@ -51,13 +52,13 @@ void main() {
   });
 
   group('EmptyWidget', () {
-    testWidgets('renders cancel icon and Success text', (tester) async {
+    testWidgets('renders cancel icon and Empty text', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: EmptyWidget()),
       );
 
       expect(find.byIcon(Icons.cancel), findsOneWidget);
-      expect(find.text('Success'), findsOneWidget);
+      expect(find.text('Empty'), findsOneWidget);
     });
   });
 }

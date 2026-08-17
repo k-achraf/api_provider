@@ -11,7 +11,7 @@ void main() {
       expect(config.connectTimeout, const Duration(seconds: 30));
       expect(config.receiveTimeout, const Duration(seconds: 30));
       expect(config.responseType, ResponseType.json);
-      expect(config.requestLogger, isTrue);
+      expect(config.requestLogger, isFalse);
       expect(config.maxRedirects, 1);
       expect(config.showResultMessage, isFalse);
       expect(config.contentType, 'application/json');

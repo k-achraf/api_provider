@@ -7,17 +7,35 @@ import 'package:easy_api_provider/src/models/api_provider_config.dart';
 import 'package:easy_api_provider/src/models/api_response.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 
-/// A singleton class that provides a configured Dio instance for making HTTP
-/// requests.
+/// A class that provides a configured Dio instance for making HTTP requests.
 ///
 /// This class supports custom configuration, request/response/error
 /// interceptors, and optional logging using [TalkerDioLogger].
+///
+/// Use [ApiProvider.instance] for the global singleton, or [ApiProvider.create]
+/// to obtain an independent instance when you need separate configurations
+/// (e.g., talking to two different backends simultaneously).
 class ApiProvider {
-  /// Private constructor for the singleton pattern.
+  /// Private constructor.
   ApiProvider._();
 
-  /// Singleton instance of [ApiProvider].
+  /// Global singleton instance of [ApiProvider].
+  ///
+  /// Call [init] once at app startup before making any requests.
   static final instance = ApiProvider._();
+
+  /// Creates a new, independent [ApiProvider] instance.
+  ///
+  /// Use this when you need multiple providers with different base URLs,
+  /// headers, or timeout settings running concurrently.
+  ///
+  /// ```dart
+  /// final authApi = ApiProvider.create()
+  ///   ..init(ApiProviderConfig('https://auth.example.com'));
+  /// final contentApi = ApiProvider.create()
+  ///   ..init(ApiProviderConfig('https://content.example.com'));
+  /// ```
+  factory ApiProvider.create() => ApiProvider._();
 
   /// Internal Dio client instance.
   Dio? _dio;
@@ -34,10 +52,14 @@ class ApiProvider {
 
   /// Initializes the Dio client with the given [config].
   ///
+  /// Any previously initialised Dio instance is closed before the new one is
+  /// created, preventing resource leaks when [init] is called more than once.
+  ///
   /// This method configures base options, adds interceptors for request,
   /// response, and error handling, sets authorization headers, and enables
   /// request logging if configured.
   void init(ApiProviderConfig config) {
+    _dio?.close(force: true); // P1: dispose previous instance
     _dio = Dio(
       BaseOptions(
         baseUrl: config.baseUrl,
@@ -103,7 +125,7 @@ class ApiProvider {
   ///
   /// If [authorization] is `null`, the `Authorization` header will be removed.
   /// Otherwise, it will be set to the provided value.
-  void setAuthorisation(dynamic authorization) {
+  void setAuthorisation(String? authorization) {
     if (authorization == null) {
       dio.options.headers.remove('Authorization');
     } else {
@@ -256,6 +278,9 @@ class ApiProvider {
   ///
   /// Returns an [ApiResponse] with either the result of the download or error
   /// details.
+  ///
+  /// > **Note:** This method is not supported on Web. Calling it on a Web
+  /// > target will result in an error response.
   Future<ApiResponse> download(
     String urlPath,
     String savePath, {
@@ -268,6 +293,7 @@ class ApiProvider {
     bool deleteOnError = true,
     ApiProviderController? controller,
   }) {
+    assert(savePath.isNotEmpty, 'savePath must not be empty.');
     return _request(
       path: urlPath,
       controller: controller,
@@ -335,12 +361,15 @@ class ApiProvider {
   }
 
   ApiResponse _handleResponse(Response<dynamic> response, String? url) {
+    // P3: guard against non-Map response bodies (arrays, strings, binary)
+    final message =
+        response.data is Map ? response.data['message'] as String? : null;
     return ApiResponse(
       success: true,
       statusCode: response.statusCode,
       data: response.data,
       url: url,
-      message: response.data?['message'] ?? 'Success',
+      message: message ?? 'Success',
     );
   }
 
