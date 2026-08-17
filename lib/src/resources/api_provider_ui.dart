@@ -14,7 +14,7 @@ typedef WidgetParam = Widget Function(BuildContext context);
 /// [ApiResponse].
 typedef ResponseWidget = Widget Function(
   BuildContext context,
-  ApiResponse? response,
+  ApiResponse<dynamic>? response,
 );
 
 /// A stateful widget that switches its child based on the current

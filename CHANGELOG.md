@@ -1,5 +1,75 @@
 # Changelog
 
+## [3.0.0] - 2026-08-17
+### Breaking Changes
+- `ApiResponse` is now generic: `ApiResponse<T>`. The `data` field changes from
+  `dynamic` to `T?`. Existing code using `ApiResponse` without a type parameter
+  continues to work as `ApiResponse<dynamic>` — **no changes required** for
+  callers that do not use the new `decoder` param.
+- All HTTP methods (`get`, `post`, `put`, `patch`, `delete`, `upload`, `download`)
+  are now generic: `Future<ApiResponse<T>>`. Type inference means existing call
+  sites need no changes.
+
+### Added
+- `decoder` optional parameter on all HTTP methods — pass a function to decode
+  the raw response body into a strongly-typed object with zero casts:
+  ```dart
+  final ApiResponse<List<Post>> res = await ApiProvider.instance.get<List<Post>>(
+    '/posts',
+    decoder: (data) => (data['posts'] as List).map(Post.fromJson).toList(),
+  );
+  ```
+
+---
+
+## [2.8.0] - 2026-08-17
+### Added
+- **Token refresh interceptor** — transparent 401 → refresh → replay flow.
+  Configure via `ApiProviderConfig.tokenRefresh: TokenRefreshConfig(...)`:
+  - Queues all concurrent requests on 401, performs a single refresh, then
+    replays all queued requests with the new token
+  - Calls `onLogout` if refresh fails or returns `null`
+  - Configurable `refreshStatusCodes` (default `[401]`)
+- **`ApiPaginator`** — stateful pagination helper for offset/page APIs:
+  - `loadNext()` fetches the next page and appends to `items`
+  - `hasMore`, `isLoading`, `currentPage`, `reset()` state accessors
+  - Smart `itemsExtractor` with auto-detection of common wrapper keys
+    (`data`, `items`, `results`, `records`)
+
+---
+
+## [2.7.0] - 2026-08-17
+### Added
+- **In-memory GET response cache** — configure via `ApiProviderConfig.cache: CacheConfig(ttl: ...)`:
+  - TTL-based expiry, LRU eviction when `maxSize` is exceeded
+  - `ApiProvider.clearCache()` to invalidate all entries
+  - `ApiProvider.cacheSize` getter to inspect current cache size
+  - `ApiCache` is exported for advanced use / testing
+- **`MultiApiProvider`** — named registry for independent `ApiProvider` instances:
+  - `MultiApiProvider.register(name, provider)` — register by name
+  - `MultiApiProvider.of(name)` — retrieve anywhere, throws `StateError` if missing
+  - `MultiApiProvider.has(name)`, `unregister(name)`, `clear()`, `registeredNames`
+
+---
+
+## [2.6.0] - 2026-08-17
+### Added
+- **Auto-retry interceptor** — configure via `ApiProviderConfig.retry: RetryConfig(...)`:
+  - Retries on `connectionTimeout`, `receiveTimeout`, `sendTimeout`,
+    `connectionError`, and HTTP 5xx errors
+  - Does **not** retry on 4xx client errors or cancelled requests
+  - Supports constant delay (default) or exponential back-off
+    (`useExponentialBackoff: true`)
+  - **Per-request override**: pass `retryConfig:` to any HTTP method to
+    override the global config for that call
+  - **Disable for one request**: `retryConfig: RetryConfig.none`
+- **Request deduplication** — enable via `ApiProviderConfig.deduplicateRequests: true`:
+  - Identical in-flight GET requests (same URL + params) are coalesced into
+    one network call; all callers receive the same response
+- **`RetryConfig` model** — exported for use in config and per-request overrides
+
+---
+
 ## [2.5.0] - 2026-08-17
 
 ### Added

@@ -3,14 +3,21 @@ import 'dart:async';
 import 'package:ansicolor/ansicolor.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_api_provider/src/controllers/api_provider_controller.dart';
+import 'package:easy_api_provider/src/interceptors/cache_interceptor.dart';
+import 'package:easy_api_provider/src/interceptors/dedup_interceptor.dart';
+import 'package:easy_api_provider/src/interceptors/retry_interceptor.dart';
+import 'package:easy_api_provider/src/interceptors/token_refresh_interceptor.dart';
 import 'package:easy_api_provider/src/models/api_provider_config.dart';
 import 'package:easy_api_provider/src/models/api_response.dart';
+import 'package:easy_api_provider/src/models/cache_config.dart';
+import 'package:easy_api_provider/src/models/retry_config.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 
 /// A class that provides a configured Dio instance for making HTTP requests.
 ///
 /// This class supports custom configuration, request/response/error
-/// interceptors, and optional logging using [TalkerDioLogger].
+/// interceptors, optional logging, retry, caching, deduplication, and
+/// transparent token refresh via [TalkerDioLogger].
 ///
 /// Use [ApiProvider.instance] for the global singleton, or [ApiProvider.create]
 /// to obtain an independent instance when you need separate configurations
@@ -40,10 +47,10 @@ class ApiProvider {
   /// Internal Dio client instance.
   Dio? _dio;
 
+  /// Internal cache instance (non-null when [ApiProviderConfig.cache] is set).
+  ApiCache? _cache;
+
   /// Returns `true` if [init] has been called and the Dio client is ready.
-  ///
-  /// Use this to guard against calling methods before initialisation or after
-  /// the provider has been closed.
   bool get isInitialized => _dio != null;
 
   /// Returns the initialized Dio instance.
@@ -60,12 +67,10 @@ class ApiProvider {
   ///
   /// Any previously initialised Dio instance is closed before the new one is
   /// created, preventing resource leaks when [init] is called more than once.
-  ///
-  /// This method configures base options, adds interceptors for request,
-  /// response, and error handling, sets authorization headers, and enables
-  /// request logging if configured.
   void init(ApiProviderConfig config) {
-    _dio?.close(force: true); // P1: dispose previous instance
+    _dio?.close(force: true);
+    _cache = null;
+
     _dio = Dio(
       BaseOptions(
         baseUrl: config.baseUrl,
@@ -79,25 +84,53 @@ class ApiProvider {
         headers: config.headers,
         validateStatus: config.validateStatus,
       ),
-    )..interceptors.add(
-        InterceptorsWrapper(
-          onRequest:
-              (RequestOptions options, RequestInterceptorHandler handler) {
-            config.onRequest?.call(options);
-            return handler.next(options);
-          },
-          onError: (DioException error, ErrorInterceptorHandler handler) {
-            config.onError?.call(error);
-            return handler.next(error);
-          },
-          onResponse:
-              (Response<dynamic> response, ResponseInterceptorHandler handler) {
-            config.onResponse?.call(response);
-            return handler.next(response);
-          },
-        ),
-      );
+    );
 
+    // 1. User interceptors (onRequest / onResponse / onError callbacks)
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
+          config.onRequest?.call(options);
+          return handler.next(options);
+        },
+        onError: (DioException error, ErrorInterceptorHandler handler) {
+          config.onError?.call(error);
+          return handler.next(error);
+        },
+        onResponse:
+            (Response<dynamic> response, ResponseInterceptorHandler handler) {
+          config.onResponse?.call(response);
+          return handler.next(response);
+        },
+      ),
+    );
+
+    // 2. Deduplication interceptor
+    if (config.deduplicateRequests) {
+      dio.interceptors.add(DedupInterceptor());
+    }
+
+    // 3. In-memory cache interceptor
+    if (config.cache != null) {
+      _cache = ApiCache(config.cache!);
+      dio.interceptors.add(CacheInterceptor(cache: _cache!));
+    }
+
+    // 4. Retry interceptor
+    if (config.retry != null && !config.retry!.isDisabled) {
+      dio.interceptors.add(
+        RetryInterceptor(dio: dio, config: config.retry!),
+      );
+    }
+
+    // 5. Token refresh interceptor
+    if (config.tokenRefresh != null) {
+      dio.interceptors.add(
+        TokenRefreshInterceptor(dio: dio, config: config.tokenRefresh!),
+      );
+    }
+
+    // Auth header
     if (config.authorization != null) {
       dio.options.headers['Authorization'] = config.authorization;
     }
@@ -110,6 +143,7 @@ class ApiProvider {
       dio.options.extra = config.extra!;
     }
 
+    // 6. Request logger (last so it sees the final request)
     if (config.requestLogger) {
       dio.interceptors.add(
         TalkerDioLogger(
@@ -147,58 +181,75 @@ class ApiProvider {
     dio.options.baseUrl = baseUrl;
   }
 
+  /// Clears all entries from the in-memory response cache.
+  ///
+  /// Has no effect if caching was not enabled in [ApiProviderConfig].
+  void clearCache() => _cache?.clear();
+
+  /// Returns the number of entries currently in the cache.
+  ///
+  /// Returns `0` if caching is not enabled.
+  int get cacheSize => _cache?.size ?? 0;
+
+  // ── HTTP Methods ─────────────────────────────────────────────────────────
+
   /// Sends a GET request to the specified [path].
   ///
-  /// Returns an [ApiResponse] which contains the result of the request.
-  Future<ApiResponse> get(
+  /// Optionally provide a [decoder] to get a strongly-typed [ApiResponse<T>]
+  /// back instead of `ApiResponse<dynamic>`:
+  /// ```dart
+  /// final ApiResponse<List<Post>> res = await provider.get<List<Post>>(
+  ///   '/posts',
+  ///   decoder: (data) => (data['posts'] as List).map(Post.fromJson).toList(),
+  /// );
+  /// ```
+  Future<ApiResponse<T>> get<T>(
     String path, {
     Map<String, dynamic>? params,
     Options? requestOptions,
     CancelToken? cancelToken,
     ProgressCallback? progressCallback,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
+    T Function(dynamic data)? decoder,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
+      decoder: decoder,
       request: () => dio.get(
         path,
         queryParameters: params,
         cancelToken: cancelToken,
         onReceiveProgress: progressCallback,
-        options: requestOptions,
+        options: _applyRetry(requestOptions, retryConfig),
       ),
     );
   }
 
   /// Sends a HEAD request to the specified [path].
-  ///
-  /// Returns an [ApiResponse] with no body — useful for checking whether a
-  /// resource exists or inspecting its headers without downloading the content.
-  Future<ApiResponse> head(
+  Future<ApiResponse<T>> head<T>(
     String path, {
     Map<String, dynamic>? params,
     Options? requestOptions,
     CancelToken? cancelToken,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
       request: () => dio.head(
         path,
         queryParameters: params,
         cancelToken: cancelToken,
-        options: requestOptions,
+        options: _applyRetry(requestOptions, retryConfig),
       ),
     );
   }
 
   /// Sends a POST request to the specified [path].
-  ///
-  /// Returns an [ApiResponse] that contains either the result of the request
-  /// or error details.
-  Future<ApiResponse> post(
+  Future<ApiResponse<T>> post<T>(
     String path, {
     Map<String, dynamic>? params,
     dynamic data,
@@ -207,10 +258,13 @@ class ApiProvider {
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
+    T Function(dynamic data)? decoder,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
+      decoder: decoder,
       request: () => dio.post(
         path,
         data: data,
@@ -218,16 +272,13 @@ class ApiProvider {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
         onSendProgress: onSendProgress,
-        options: requestOptions,
+        options: _applyRetry(requestOptions, retryConfig),
       ),
     );
   }
 
   /// Sends a PATCH request to the specified [path].
-  ///
-  /// Returns an [ApiResponse] that contains either the result of the request
-  /// or error details.
-  Future<ApiResponse> patch(
+  Future<ApiResponse<T>> patch<T>(
     String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
@@ -236,10 +287,13 @@ class ApiProvider {
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
+    T Function(dynamic data)? decoder,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
+      decoder: decoder,
       request: () => dio.patch(
         path,
         data: data,
@@ -247,16 +301,13 @@ class ApiProvider {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
         onSendProgress: onSendProgress,
-        options: requestOptions,
+        options: _applyRetry(requestOptions, retryConfig),
       ),
     );
   }
 
   /// Sends a PUT request to the specified [path].
-  ///
-  /// Returns an [ApiResponse] that contains either the result of the request
-  /// or error details.
-  Future<ApiResponse> put(
+  Future<ApiResponse<T>> put<T>(
     String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
@@ -265,10 +316,13 @@ class ApiProvider {
     ProgressCallback? onReceiveProgress,
     ProgressCallback? onSendProgress,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
+    T Function(dynamic data)? decoder,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
+      decoder: decoder,
       request: () => dio.put(
         path,
         data: data,
@@ -276,32 +330,32 @@ class ApiProvider {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
         onSendProgress: onSendProgress,
-        options: requestOptions,
+        options: _applyRetry(requestOptions, retryConfig),
       ),
     );
   }
 
   /// Sends a DELETE request to the specified [path].
-  ///
-  /// Returns an [ApiResponse] that contains either the result of the request
-  /// or error details.
-  Future<ApiResponse> delete(
+  Future<ApiResponse<T>> delete<T>(
     String path, {
     Map<String, dynamic>? params,
     Map<String, dynamic>? data,
     Options? requestOptions,
     CancelToken? cancelToken,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
+    T Function(dynamic data)? decoder,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
+      decoder: decoder,
       request: () => dio.delete(
         path,
         data: data,
         queryParameters: params,
         cancelToken: cancelToken,
-        options: requestOptions,
+        options: _applyRetry(requestOptions, retryConfig),
       ),
     );
   }
@@ -316,14 +370,13 @@ class ApiProvider {
   ///   '/profile/avatar',
   ///   FormData.fromMap({
   ///     'file': await MultipartFile.fromFile('/path/to/image.jpg'),
-  ///     'userId': '42',
   ///   }),
   ///   onSendProgress: (sent, total) {
   ///     print('${(sent / total * 100).toStringAsFixed(1)}%');
   ///   },
   /// );
   /// ```
-  Future<ApiResponse> upload(
+  Future<ApiResponse<T>> upload<T>(
     String path,
     FormData formData, {
     Map<String, dynamic>? params,
@@ -332,10 +385,13 @@ class ApiProvider {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
     ApiProviderController? controller,
+    RetryConfig? retryConfig,
+    T Function(dynamic data)? decoder,
   }) {
-    return _request(
+    return _request<T>(
       path: path,
       controller: controller,
+      decoder: decoder,
       request: () => dio.post(
         path,
         data: formData,
@@ -355,12 +411,8 @@ class ApiProvider {
 
   /// Downloads a file from the given [urlPath] and saves it to [savePath].
   ///
-  /// Returns an [ApiResponse] with either the result of the download or error
-  /// details.
-  ///
-  /// > **Note:** This method is not supported on Web. Calling it on a Web
-  /// > target will result in an error response.
-  Future<ApiResponse> download(
+  /// > **Note:** This method is not supported on Web.
+  Future<ApiResponse<T>> download<T>(
     String urlPath,
     String savePath, {
     Map<String, dynamic>? params,
@@ -373,7 +425,7 @@ class ApiProvider {
     ApiProviderController? controller,
   }) {
     assert(savePath.isNotEmpty, 'savePath must not be empty.');
-    return _request(
+    return _request<T>(
       path: urlPath,
       controller: controller,
       request: () => dio.download(
@@ -390,16 +442,17 @@ class ApiProvider {
     );
   }
 
-  /// Executes an HTTP request with unified error handling, timing, and optional
-  /// controller state management.
-  Future<ApiResponse> _request({
+  // ── Internal helpers ──────────────────────────────────────────────────────
+
+  /// Executes an HTTP request with unified error handling, timing, optional
+  /// controller state management, and optional response decoding.
+  Future<ApiResponse<T>> _request<T>({
     required String path,
     required Future<Response<dynamic>> Function() request,
     ApiProviderController? controller,
+    T Function(dynamic data)? decoder,
   }) async {
-    if (controller != null) {
-      controller.loading();
-    }
+    controller?.loading();
 
     final url = '${dio.options.baseUrl}$path';
     final stopwatch = Stopwatch()..start();
@@ -407,59 +460,43 @@ class ApiProvider {
     try {
       final response = await request();
       stopwatch.stop();
-      final result = _handleResponse(response, url, stopwatch.elapsed);
-
-      if (controller != null) {
-        controller.success(apiResponse: result);
-      }
-
+      final result = _handleResponse<T>(response, url, stopwatch.elapsed, decoder);
+      controller?.success(apiResponse: result);
       return result;
     } on DioException catch (e) {
       stopwatch.stop();
-      final error = _handleDioError(e, url, stopwatch.elapsed);
-
-      if (controller != null) {
-        controller.error(apiResponse: error);
-      }
-
+      final error = _handleDioError<T>(e, url, stopwatch.elapsed);
+      controller?.error(apiResponse: error);
       return error;
     } on TimeoutException {
       stopwatch.stop();
-      final error = _handleTimeOutException(url, stopwatch.elapsed);
-
-      if (controller != null) {
-        controller.error(apiResponse: error);
-      }
-
+      final error = _handleTimeOutException<T>(url, stopwatch.elapsed);
+      controller?.error(apiResponse: error);
       return error;
     } catch (e) {
       stopwatch.stop();
-      final error = _handleUnexpectedException(e, url, stopwatch.elapsed);
-
-      if (controller != null) {
-        controller.error(apiResponse: error);
-      }
-
+      final error = _handleUnexpectedException<T>(e, url, stopwatch.elapsed);
+      controller?.error(apiResponse: error);
       return error;
     }
   }
 
-  ApiResponse _handleResponse(
+  ApiResponse<T> _handleResponse<T>(
     Response<dynamic> response,
     String? url,
     Duration duration,
+    T Function(dynamic data)? decoder,
   ) {
-    // P3: guard against non-Map response bodies (arrays, strings, binary)
     final message =
         response.data is Map ? response.data['message'] as String? : null;
-
-    // Extract headers into a plain Map<String, List<String>>
     final headers = response.headers.map;
 
-    return ApiResponse(
+    final decodedData = decoder != null ? decoder(response.data) : response.data;
+
+    return ApiResponse<T>(
       success: true,
       statusCode: response.statusCode,
-      data: response.data,
+      data: decodedData as T?,
       url: url,
       message: message ?? 'Success',
       headers: headers,
@@ -467,7 +504,7 @@ class ApiProvider {
     );
   }
 
-  ApiResponse _handleDioError(
+  ApiResponse<T> _handleDioError<T>(
     DioException error,
     String? url,
     Duration duration,
@@ -484,15 +521,10 @@ class ApiProvider {
       DioExceptionType.unknown => 'Unexpected error occurred',
     };
 
-    // Extract structured error data when the body is a Map
-    final errorData = error.response?.data is Map
-        ? error.response?.data
-        : error.response?.data;
-
-    return ApiResponse(
+    return ApiResponse<T>(
       success: false,
       statusCode: error.response?.statusCode,
-      data: errorData,
+      data: null,
       url: url,
       message: errorMessage,
       headers: error.response?.headers.map,
@@ -500,8 +532,8 @@ class ApiProvider {
     );
   }
 
-  ApiResponse _handleTimeOutException(String? url, Duration duration) {
-    return ApiResponse(
+  ApiResponse<T> _handleTimeOutException<T>(String? url, Duration duration) {
+    return ApiResponse<T>(
       success: false,
       message: 'Server not responding',
       url: url,
@@ -509,17 +541,22 @@ class ApiProvider {
     );
   }
 
-  ApiResponse _handleUnexpectedException(
+  ApiResponse<T> _handleUnexpectedException<T>(
     Object? error,
     String? url,
     Duration duration,
   ) {
-    return ApiResponse(
+    return ApiResponse<T>(
       success: false,
       url: url,
-      data: error,
       message: error.toString(),
       requestDuration: duration,
     );
+  }
+
+  /// Merges a per-request [RetryConfig] override into [Options.extra].
+  Options? _applyRetry(Options? base, RetryConfig? retryConfig) {
+    if (retryConfig == null) return base;
+    return RetryInterceptor.optionsWithConfig(retryConfig, base);
   }
 }

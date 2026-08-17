@@ -1,4 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:easy_api_provider/src/models/cache_config.dart';
+import 'package:easy_api_provider/src/models/retry_config.dart';
+import 'package:easy_api_provider/src/models/token_refresh_config.dart';
 
 /// A callback that is triggered before a request is sent.
 ///
@@ -18,7 +21,7 @@ typedef OnResponseCallback = void Function(Response<dynamic> response);
 /// Configuration class for customizing Dio-based API requests.
 ///
 /// This class provides flexible options for setting headers, timeouts,
-/// content types, request logging, custom callbacks, and more.
+/// content types, request logging, retry, caching, token-refresh, and more.
 class ApiProviderConfig {
   /// The base URL of the API (e.g., `https://api.example.com`).
   final String baseUrl;
@@ -92,6 +95,34 @@ class ApiProviderConfig {
   /// ```
   final bool Function(int?)? validateStatus;
 
+  /// Auto-retry configuration.
+  ///
+  /// When set, failed requests are automatically retried according to the
+  /// [RetryConfig]. Can be overridden per-request by passing `retryConfig`
+  /// to individual HTTP methods.
+  ///
+  /// Set to [RetryConfig.none] to disable retry globally.
+  final RetryConfig? retry;
+
+  /// In-memory GET response cache configuration.
+  ///
+  /// When set, successful GET responses are cached for the configured [CacheConfig.ttl].
+  /// Call [ApiProvider.clearCache] to invalidate the entire cache.
+  final CacheConfig? cache;
+
+  /// Transparent token-refresh configuration.
+  ///
+  /// When set, 401 (or other configured) responses trigger an automatic
+  /// token refresh followed by a transparent replay of the failed request.
+  final TokenRefreshConfig? tokenRefresh;
+
+  /// Whether to deduplicate identical in-flight GET requests.
+  ///
+  /// When `true`, if the same GET URL is requested while a previous request
+  /// is still pending, only one network call is made and all callers receive
+  /// the same response. Defaults to `false`.
+  final bool deduplicateRequests;
+
   /// Creates a new instance of [ApiProviderConfig] with optional overrides.
   const ApiProviderConfig(
     this.baseUrl, {
@@ -112,6 +143,10 @@ class ApiProviderConfig {
     this.onError,
     this.onResponse,
     this.validateStatus,
+    this.retry,
+    this.cache,
+    this.tokenRefresh,
+    this.deduplicateRequests = false,
   }) : assert(
          authorization == null || authorization is String,
          'authorization must be a String (e.g. "Bearer token") or null.',

@@ -1,18 +1,38 @@
-/// A class that represents a standardized API response.
+/// A strongly-typed class that represents a standardized API response.
 ///
-/// This model helps unify the format of responses returned from API calls,
-/// making it easier to handle success, error, and other status conditions.
-class ApiResponse {
+/// The type parameter [T] is the decoded data type. When no [decoder] is
+/// provided to an HTTP method, [T] defaults to `dynamic` which preserves
+/// backward compatibility.
+///
+/// ### Typed usage
+/// ```dart
+/// final ApiResponse<List<Post>> response = await ApiProvider.instance.get<List<Post>>(
+///   '/posts',
+///   decoder: (data) => (data['posts'] as List).map(Post.fromJson).toList(),
+/// );
+///
+/// if (response.success) {
+///   final List<Post> posts = response.data!; // fully typed, no cast needed
+/// }
+/// ```
+///
+/// ### Untyped usage (backward compatible)
+/// ```dart
+/// final ApiResponse response = await ApiProvider.instance.get('/posts');
+/// print(response.data); // dynamic
+/// ```
+class ApiResponse<T> {
   /// Indicates whether the request was successful or not.
   final bool success;
 
   /// The HTTP status code returned by the server (e.g., 200, 404, 500).
   final int? statusCode;
 
-  /// The actual data returned from the API.
+  /// The decoded response data.
   ///
-  /// This could be a map, list, or any other type depending on the endpoint.
-  final dynamic data;
+  /// When a [decoder] was provided to the HTTP method this is strongly typed
+  /// as [T]. Otherwise it is the raw `dynamic` value from Dio.
+  final T? data;
 
   /// The URL that was called to get this response.
   final String? url;
@@ -53,16 +73,16 @@ class ApiResponse {
   ///
   /// Useful for transforming responses in middleware, tests, or mapping layers
   /// without mutating the original object.
-  ApiResponse copyWith({
+  ApiResponse<T> copyWith({
     bool? success,
     int? statusCode,
-    dynamic data,
+    T? data,
     String? url,
     String? message,
     Map<String, List<String>>? headers,
     Duration? requestDuration,
   }) {
-    return ApiResponse(
+    return ApiResponse<T>(
       success: success ?? this.success,
       statusCode: statusCode ?? this.statusCode,
       data: data ?? this.data,
@@ -80,8 +100,9 @@ class ApiResponse {
       if (statusCode != null) 'statusCode: $statusCode',
       if (url != null) 'url: $url',
       if (message != null) 'message: $message',
-      if (requestDuration != null) 'duration: ${requestDuration!.inMilliseconds}ms',
+      if (requestDuration != null)
+        'duration: ${requestDuration!.inMilliseconds}ms',
     ];
-    return 'ApiResponse(${parts.join(', ')})';
+    return 'ApiResponse<$T>(${parts.join(', ')})';
   }
 }

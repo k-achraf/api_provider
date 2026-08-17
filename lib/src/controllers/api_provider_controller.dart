@@ -62,7 +62,7 @@ class ApiProviderController extends ChangeNotifier {
   ApiProviderStatus? get previousStatus => _previousStatus;
 
   /// The API response associated with the current status, if any.
-  ApiResponse? response;
+  ApiResponse<dynamic>? response;
 
   // ── Convenience getters ──────────────────────────────────────────────────
 
@@ -100,7 +100,7 @@ class ApiProviderController extends ChangeNotifier {
   ///
   /// Automatically transitions to [ApiProviderStatus.empty] if [apiResponse]
   /// has no data (i.e. `data` is `null` or an empty [List] / [Map]).
-  void success({ApiResponse? apiResponse}) {
+  void success({ApiResponse<dynamic>? apiResponse}) {
     response = apiResponse;
     final data = apiResponse?.data;
     final hasData = data != null &&
@@ -110,7 +110,7 @@ class ApiProviderController extends ChangeNotifier {
   }
 
   /// Sets the status to [ApiProviderStatus.error] and stores the response.
-  void error({ApiResponse? apiResponse}) {
+  void error({ApiResponse<dynamic>? apiResponse}) {
     response = apiResponse;
     _setStatus(ApiProviderStatus.error);
   }
