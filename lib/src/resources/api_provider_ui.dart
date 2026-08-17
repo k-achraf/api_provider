@@ -38,6 +38,10 @@ class ApiProviderUi extends StatefulWidget {
   /// Widget shown when status is [ApiProviderStatus.error].
   final ResponseWidget? errorWidget;
 
+  /// Creates an [ApiProviderUi] widget driven by the given [controller].
+  ///
+  /// All state-specific builder callbacks are optional — a sensible default
+  /// widget is shown for any callback that is omitted.
   const ApiProviderUi({
     required this.controller,
     this.idleWidget,

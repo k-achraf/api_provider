@@ -26,8 +26,26 @@ enum ApiProviderStatus {
 ///
 /// It is intended to be used with UI components to reflect API request states
 /// such as loading, success, error, etc.
+///
+/// ### Example
+///
+/// ```dart
+/// final controller = ApiProviderController();
+///
+/// // Use with ApiProvider:
+/// ApiProvider.instance.get('/posts', controller: controller);
+///
+/// // Use with ApiProviderUi:
+/// ApiProviderUi(
+///   controller: controller,
+///   successWidget: (context, response) => Text('${response?.data}'),
+/// );
+/// ```
 class ApiProviderController extends ChangeNotifier {
-  /// The current status of the API.
+  /// Creates a new [ApiProviderController] with an initial
+  /// [ApiProviderStatus.idle] state.
+  ApiProviderController();
+
   ApiProviderStatus _status = ApiProviderStatus.idle;
 
   /// The current status of the API.

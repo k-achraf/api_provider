@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// Default loading state widget used by [ApiProviderUi] when no custom
+/// [loadingWidget] is provided.
+///
+/// Displays a [CircularProgressIndicator] with a brief loading label.
 class LoadingWidget extends StatelessWidget {
+  /// Creates the default [LoadingWidget].
   const LoadingWidget({super.key});
 
   @override
@@ -11,8 +16,8 @@ class LoadingWidget extends StatelessWidget {
           backgroundColor: Theme.of(context).canvasColor,
           color: Theme.of(context).primaryColor,
         ),
-        SizedBox(height: 20),
-        Text('Data loading ...'),
+        const SizedBox(height: 20),
+        const Text('Data loading ...'),
       ],
     );
   }

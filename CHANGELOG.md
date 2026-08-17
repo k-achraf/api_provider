@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.3.0] - 2026-08-17
+### Added
+- Library-level dartdoc comment for the `easy_api_provider` export file
+- Constructor-level doc comments on `ApiProviderController` and `ApiProviderUi` for 100% public API documentation coverage
+
+### Fixed
+- Default widgets (`IdleWidget`, `LoadingWidget`, `SuccessWidget`, `ApiErrorWidget`, `EmptyWidget`) now have complete dartdoc comments
+- `EmptyWidget` displayed incorrect "Success" text — now correctly shows "Empty"
+- `IdleWidget` now renders `SizedBox.shrink()` instead of a visible `Text('Idle')` label
+- Made `SuccessWidget` and `ApiErrorWidget` bodies `const` for better performance
+
 ## [2.2.0] - 2026-06-03
 ### Added
 - Animated preview GIF showcasing the example application
