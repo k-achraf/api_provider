@@ -101,14 +101,16 @@ class _DownloadScreenState extends State<DownloadScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: response!.success
-                    ? Colors.green.withValues(alpha: 0.05)
-                    : Colors.red.withValues(alpha: 0.05),
+                color:
+                    response!.success
+                        ? Colors.green.withValues(alpha: 0.05)
+                        : Colors.red.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: response!.success
-                      ? Colors.green.withValues(alpha: 0.2)
-                      : Colors.red.withValues(alpha: 0.2),
+                  color:
+                      response!.success
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.red.withValues(alpha: 0.2),
                 ),
               ),
               child: Column(
@@ -121,8 +123,7 @@ class _DownloadScreenState extends State<DownloadScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (response!.message != null)
-                    Text(response!.message!),
+                  if (response!.message != null) Text(response!.message!),
                 ],
               ),
             ),

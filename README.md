@@ -1,11 +1,11 @@
-# easy_api_provider
+# easy_api_provider — Flutter REST API Client & API Provider
 
 [![pub package](https://img.shields.io/pub/v/easy_api_provider.svg)](https://pub.dev/packages/easy_api_provider)
 [![pub points](https://img.shields.io/pub/points/easy_api_provider?color=2E8B57&label=pub%20points)](https://pub.dev/packages/easy_api_provider/score)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/k-achraf/api_provider/blob/main/LICENSE)
 [![Flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.0-blue.svg)](https://flutter.dev)
 
-A lightweight **Flutter HTTP client** built on [Dio](https://pub.dev/packages/dio) that handles **REST API requests** with built-in **UI state management**. Stop writing repetitive loading, success, error, and empty widget logic — `easy_api_provider` does it for you.
+`easy_api_provider` is a lightweight **Flutter API provider** and **REST API client** built on [Dio](https://pub.dev/packages/dio). It wraps every HTTP API call with built-in **UI state management**, so you stop writing repetitive loading, success, error, and empty widget logic by hand.
 
 ## Why easy_api_provider?
 

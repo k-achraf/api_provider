@@ -40,9 +40,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
     setState(() => patchLoading = true);
     final result = await ApiProvider.instance.patch(
       '/posts/$postId',
-      data: {
-        'title': _titleController.text,
-      },
+      data: {'title': _titleController.text},
     );
     setState(() {
       patchResponse = result;
@@ -81,10 +79,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
-                  items: List.generate(10, (i) => DropdownMenuItem(
-                    value: i + 1,
-                    child: Text('${i + 1}'),
-                  )),
+                  items: List.generate(
+                    10,
+                    (i) =>
+                        DropdownMenuItem(value: i + 1, child: Text('${i + 1}')),
+                  ),
                   onChanged: (v) => setState(() => postId = v ?? 1),
                 ),
               ),
@@ -113,12 +112,14 @@ class _EditPostScreenState extends State<EditPostScreen> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: putLoading ? null : _putUpdate,
-                  icon: putLoading
-                      ? const SizedBox(
-                          width: 16, height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.upload, size: 16),
+                  icon:
+                      putLoading
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.upload, size: 16),
                   label: const Text('PUT'),
                 ),
               ),
@@ -126,12 +127,14 @@ class _EditPostScreenState extends State<EditPostScreen> {
               Expanded(
                 child: FilledButton.tonalIcon(
                   onPressed: patchLoading ? null : _patchUpdate,
-                  icon: patchLoading
-                      ? const SizedBox(
-                          width: 16, height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.edit, size: 16),
+                  icon:
+                      patchLoading
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.edit, size: 16),
                   label: const Text('PATCH'),
                 ),
               ),
@@ -139,13 +142,19 @@ class _EditPostScreenState extends State<EditPostScreen> {
           ),
           if (putResponse != null) ...[
             const SizedBox(height: 16),
-            Text('PUT Response:', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              'PUT Response:',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             ResponseViewer(response: putResponse!),
           ],
           if (patchResponse != null) ...[
             const SizedBox(height: 16),
-            Text('PATCH Response:', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              'PATCH Response:',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: 8),
             ResponseViewer(response: patchResponse!),
           ],

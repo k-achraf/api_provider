@@ -15,10 +15,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('easy_api_provider'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('easy_api_provider'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -30,7 +27,9 @@ class HomeScreen extends StatelessWidget {
           Text(
             'Each screen demonstrates a different feature using DummyJSON API.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 24),
@@ -44,7 +43,8 @@ class HomeScreen extends StatelessWidget {
             children: [
               FeatureCard(
                 title: 'GET & UI States',
-                subtitle: 'ApiProviderUi with idle, loading, success, error, empty',
+                subtitle:
+                    'ApiProviderUi with idle, loading, success, error, empty',
                 icon: Icons.list_alt,
                 color: Colors.blue,
                 onTap: () => _push(context, const GetPostsScreen()),

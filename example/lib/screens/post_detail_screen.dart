@@ -59,10 +59,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
-                  items: List.generate(10, (i) => DropdownMenuItem(
-                    value: i + 1,
-                    child: Text('${i + 1}'),
-                  )),
+                  items: List.generate(
+                    10,
+                    (i) =>
+                        DropdownMenuItem(value: i + 1, child: Text('${i + 1}')),
+                  ),
                   onChanged: (v) => setState(() => postId = v ?? 1),
                 ),
               ),

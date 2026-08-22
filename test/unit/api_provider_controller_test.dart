@@ -47,17 +47,20 @@ void main() {
     });
 
     test('success() with null data auto-transitions to empty', () {
-      controller.success(apiResponse: const ApiResponse(success: true, data: null));
+      controller.success(
+          apiResponse: const ApiResponse(success: true, data: null));
       expect(controller.status, ApiProviderStatus.empty);
     });
 
     test('success() with empty List auto-transitions to empty', () {
-      controller.success(apiResponse: const ApiResponse(success: true, data: []));
+      controller.success(
+          apiResponse: const ApiResponse(success: true, data: []));
       expect(controller.status, ApiProviderStatus.empty);
     });
 
     test('success() with empty Map auto-transitions to empty', () {
-      controller.success(apiResponse: const ApiResponse(success: true, data: {}));
+      controller.success(
+          apiResponse: const ApiResponse(success: true, data: {}));
       expect(controller.status, ApiProviderStatus.empty);
     });
 

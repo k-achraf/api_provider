@@ -1,5 +1,5 @@
 name: easy_api_provider
-description: "Flutter Dio API client with typed responses, retry, caching, deduplication, token refresh, pagination, state management, and reactive UI widgets."
+description: "Flutter REST API client and API provider built on Dio: typed responses, retry, caching, deduplication, token refresh, pagination, and reactive UI widgets."
 version: 3.0.0
 homepage: https://github.com/k-achraf/api_provider
 repository: https://github.com/k-achraf/api_provider
@@ -29,7 +29,7 @@ topics:
   - http
   - dio
   - network
-  - request
+  - rest
 
 funding:
   - https://github.com/sponsors/k-achraf

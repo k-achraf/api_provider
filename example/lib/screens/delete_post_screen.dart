@@ -17,21 +17,22 @@ class _DeletePostScreenState extends State<DeletePostScreen> {
   Future<void> _deletePost() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: Text('Delete post #$postId?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Confirm Delete'),
+            content: Text('Delete post #$postId?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed != true) return;
@@ -68,22 +69,25 @@ class _DeletePostScreenState extends State<DeletePostScreen> {
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
-                  items: List.generate(10, (i) => DropdownMenuItem(
-                    value: i + 1,
-                    child: Text('${i + 1}'),
-                  )),
+                  items: List.generate(
+                    10,
+                    (i) =>
+                        DropdownMenuItem(value: i + 1, child: Text('${i + 1}')),
+                  ),
                   onChanged: (v) => setState(() => postId = v ?? 1),
                 ),
               ),
               const SizedBox(width: 12),
               FilledButton.icon(
                 onPressed: loading ? null : _deletePost,
-                icon: loading
-                    ? const SizedBox(
-                        width: 18, height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.delete, size: 18),
+                icon:
+                    loading
+                        ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Icon(Icons.delete, size: 18),
                 style: FilledButton.styleFrom(backgroundColor: Colors.red),
                 label: const Text('DELETE'),
               ),

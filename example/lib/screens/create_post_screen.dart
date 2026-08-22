@@ -78,13 +78,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             width: double.infinity,
             child: FilledButton.icon(
               onPressed: loading ? null : _createPost,
-              icon: loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.send, size: 18),
+              icon:
+                  loading
+                      ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Icon(Icons.send, size: 18),
               label: const Text('POST /posts/add'),
             ),
           ),

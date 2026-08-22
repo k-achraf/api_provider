@@ -16,7 +16,10 @@ class _InterceptorsScreenState extends State<InterceptorsScreen> {
 
   void _log(String entry) {
     setState(() {
-      logs.insert(0, '${DateTime.now().toLocal().toString().substring(11, 23)} $entry');
+      logs.insert(
+        0,
+        '${DateTime.now().toLocal().toString().substring(11, 23)} $entry',
+      );
       if (logs.length > 20) logs.removeLast();
     });
   }
@@ -111,7 +114,10 @@ class _InterceptorsScreenState extends State<InterceptorsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Text('Interceptor Log:', style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            'Interceptor Log:',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
@@ -121,20 +127,29 @@ class _InterceptorsScreenState extends State<InterceptorsScreen> {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.outline.withValues(alpha: 0.2),
               ),
             ),
-            child: logs.isEmpty
-                ? const Text('No logs yet. Send a request above.',
-                    style: TextStyle(color: Colors.grey))
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: logs.length,
-                    itemBuilder: (_, i) => Text(
-                      logs[i],
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+            child:
+                logs.isEmpty
+                    ? const Text(
+                      'No logs yet. Send a request above.',
+                      style: TextStyle(color: Colors.grey),
+                    )
+                    : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: logs.length,
+                      itemBuilder:
+                          (_, i) => Text(
+                            logs[i],
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                            ),
+                          ),
                     ),
-                  ),
           ),
           if (response != null) ...[
             const SizedBox(height: 16),

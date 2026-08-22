@@ -8,7 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('IdleWidget', () {
-    testWidgets('renders an invisible SizedBox (no visible content)', (tester) async {
+    testWidgets('renders an invisible SizedBox (no visible content)',
+        (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: IdleWidget()),
       );

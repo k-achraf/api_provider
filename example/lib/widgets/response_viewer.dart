@@ -20,26 +20,30 @@ class ResponseViewer extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: response.success
-            ? Colors.green.withValues(alpha: 0.05)
-            : Colors.red.withValues(alpha: 0.05),
+        color:
+            response.success
+                ? Colors.green.withValues(alpha: 0.05)
+                : Colors.red.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: response.success
-              ? Colors.green.withValues(alpha: 0.2)
-              : Colors.red.withValues(alpha: 0.2),
+          color:
+              response.success
+                  ? Colors.green.withValues(alpha: 0.2)
+                  : Colors.red.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildRow(context, 'Status',
+          _buildRow(
+            context,
+            'Status',
             response.success ? 'SUCCESS' : 'ERROR',
-            response.success ? Colors.green : Colors.red),
+            response.success ? Colors.green : Colors.red,
+          ),
           if (response.statusCode != null)
             _buildRow(context, 'HTTP Code', '${response.statusCode}'),
-          if (response.url != null)
-            _buildRow(context, 'URL', response.url!),
+          if (response.url != null) _buildRow(context, 'URL', response.url!),
           if (response.message != null)
             _buildRow(context, 'Message', response.message!),
           if (showFullData && response.data != null) ...[
@@ -71,7 +75,12 @@ class ResponseViewer extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(BuildContext context, String label, String value, [Color? color]) {
+  Widget _buildRow(
+    BuildContext context,
+    String label,
+    String value, [
+    Color? color,
+  ]) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -81,9 +90,9 @@ class ResponseViewer extends StatelessWidget {
             width: 80,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(

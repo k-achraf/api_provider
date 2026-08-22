@@ -148,7 +148,7 @@ class ApiProviderConfig {
     this.tokenRefresh,
     this.deduplicateRequests = false,
   }) : assert(
-         authorization == null || authorization is String,
-         'authorization must be a String (e.g. "Bearer token") or null.',
-       );
+          authorization == null || authorization is String,
+          'authorization must be a String (e.g. "Bearer token") or null.',
+        );
 }

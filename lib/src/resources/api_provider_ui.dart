@@ -144,8 +144,8 @@ class _ApiProviderUiState extends State<ApiProviderUi> {
       duration: widget.transitionDuration,
       switchInCurve: widget.switchInCurve,
       switchOutCurve: widget.switchOutCurve,
-      transitionBuilder: widget.transitionBuilder ??
-          AnimatedSwitcher.defaultTransitionBuilder,
+      transitionBuilder:
+          widget.transitionBuilder ?? AnimatedSwitcher.defaultTransitionBuilder,
       child: _buildCurrentState(),
     );
   }

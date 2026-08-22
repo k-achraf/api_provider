@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0] - 2026-08-17
+## [3.0.0] - 2026-08-22
 ### Breaking Changes
 - `ApiResponse` is now generic: `ApiResponse<T>`. The `data` field changes from
   `dynamic` to `T?`. Existing code using `ApiResponse` without a type parameter
@@ -19,6 +19,20 @@
     decoder: (data) => (data['posts'] as List).map(Post.fromJson).toList(),
   );
   ```
+
+### Fixed
+- Non-exhaustive `DioExceptionType` switch statements in `ApiProvider._handleDioError`
+  and `RetryInterceptor._shouldRetry` that failed static analysis after dio added
+  `DioExceptionType.transformTimeout`. Both now fall back to a safe default, so
+  future `DioExceptionType` additions won't break analysis again.
+- Applied `dart format` across the package for a clean `pub.dev` static analysis
+  score.
+
+### Changed
+- Reworded the package description and README intro to explicitly mention
+  "REST API client" and "API provider" for better `pub.dev` search relevance.
+- Swapped the `request` topic for `rest` to match how comparable packages are
+  tagged.
 
 ---
 

@@ -460,7 +460,8 @@ class ApiProvider {
     try {
       final response = await request();
       stopwatch.stop();
-      final result = _handleResponse<T>(response, url, stopwatch.elapsed, decoder);
+      final result =
+          _handleResponse<T>(response, url, stopwatch.elapsed, decoder);
       controller?.success(apiResponse: result);
       return result;
     } on DioException catch (e) {
@@ -491,7 +492,8 @@ class ApiProvider {
         response.data is Map ? response.data['message'] as String? : null;
     final headers = response.headers.map;
 
-    final decodedData = decoder != null ? decoder(response.data) : response.data;
+    final decodedData =
+        decoder != null ? decoder(response.data) : response.data;
 
     return ApiResponse<T>(
       success: true,
@@ -519,6 +521,7 @@ class ApiProvider {
       DioExceptionType.connectionError => 'Connection error',
       DioExceptionType.badCertificate => 'Bad certificate',
       DioExceptionType.unknown => 'Unexpected error occurred',
+      _ => 'Unexpected error occurred',
     };
 
     return ApiResponse<T>(

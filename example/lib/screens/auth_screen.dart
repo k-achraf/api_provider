@@ -68,13 +68,16 @@ class _AuthScreenState extends State<AuthScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // Auth section
-          Text('Authorization Header', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Authorization Header',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 4),
           Text(
             'Current: $currentAuth',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
           ),
           const SizedBox(height: 12),
           Wrap(

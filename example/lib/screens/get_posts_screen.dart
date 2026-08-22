@@ -49,7 +49,10 @@ class _GetPostsScreenState extends State<GetPostsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
               children: [
-                Text('Limit: $limit', style: Theme.of(context).textTheme.titleSmall),
+                Text(
+                  'Limit: $limit',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
                 Expanded(
                   child: Slider(
                     value: limit.toDouble(),
@@ -103,26 +106,32 @@ class _GetPostsScreenState extends State<GetPostsScreen> {
           Expanded(
             child: ApiProviderUi(
               controller: controller,
-              idleWidget: (_) => const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.hourglass_empty, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text('Press Fetch to load posts'),
-                  ],
-                ),
-              ),
-              loadingWidget: (_) => const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Loading posts...'),
-                  ],
-                ),
-              ),
+              idleWidget:
+                  (_) => const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.hourglass_empty,
+                          size: 48,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 8),
+                        Text('Press Fetch to load posts'),
+                      ],
+                    ),
+                  ),
+              loadingWidget:
+                  (_) => const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Loading posts...'),
+                      ],
+                    ),
+                  ),
               successWidget: (_, response) {
                 final posts = _extractPosts(response);
                 if (posts.isEmpty) {
@@ -143,7 +152,8 @@ class _GetPostsScreenState extends State<GetPostsScreen> {
                     final post = posts[i];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
                         child: Text('${post['id']}'),
                       ),
                       title: Text(
@@ -160,28 +170,37 @@ class _GetPostsScreenState extends State<GetPostsScreen> {
                   },
                 );
               },
-              errorWidget: (_, response) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                    const SizedBox(height: 8),
-                    Text(response?.message ?? 'Unknown error'),
-                    const SizedBox(height: 8),
-                    FilledButton(onPressed: _fetchPosts, child: const Text('Retry')),
-                  ],
-                ),
-              ),
-              emptyWidget: (_) => const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.inbox, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text('No posts found'),
-                  ],
-                ),
-              ),
+              errorWidget:
+                  (_, response) => Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(response?.message ?? 'Unknown error'),
+                        const SizedBox(height: 8),
+                        FilledButton(
+                          onPressed: _fetchPosts,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+              emptyWidget:
+                  (_) => const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.inbox, size: 48, color: Colors.grey),
+                        SizedBox(height: 8),
+                        Text('No posts found'),
+                      ],
+                    ),
+                  ),
             ),
           ),
         ],
